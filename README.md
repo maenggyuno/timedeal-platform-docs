@@ -17,7 +17,8 @@
 <br>
 
 ## 🏗️ 2. System Architecture
-![Uploading 동네콕 아키텍처.drawio.png…]()
+<img width="925" height="507" alt="동네콕 아키텍처 drawio" src="https://github.com/user-attachments/assets/199231ee-5f43-42c6-a7eb-fa94f126818e" />
+
 
 
 ### 🌐 Domain & Routing Strategy
