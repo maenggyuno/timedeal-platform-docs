@@ -27,13 +27,18 @@
 * **Backend (`api.dongnekok.shop`):** Cloudflare Tunnel을 활용해 백엔드 서버의 공인 IP를 은닉하고, 단일 보안 터널을 통해서만 API 통신이 가능하도록 방어 표면을 구축했습니다. (Cloudflare Proxy 적용)
 
 ### 🗄️ Database Architecture (Logical ERD)
-*(여기에 핵심 테이블만 남긴 요약본 ERD 이미지 파일 업로드)*
-<img width="1144" height="1168" alt="image" src="https://github.com/user-attachments/assets/1f166872-20bc-48e8-8c81-d275c92824dc" />
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/55028921-8b1a-4273-a96b-f247426cb38f" width="48%" alt="Users Table">
+  <img src="https://github.com/user-attachments/assets/4aac2868-e4d3-4e85-9f55-506b7e0c2d50" width="48%" alt="Stores Table">
+  <br>
+  <img src="https://github.com/user-attachments/assets/97dbb6cd-da06-4337-a7d7-e917e0a333ae" width="48%" alt="Products Table">
+  <img src="https://github.com/user-attachments/assets/ae717098-55ad-45b9-a888-4c2b02e4b457" width="48%" alt="OrderItems Table">
+</p>
 
 > 🔒 **Security Notice:** 본 ERD는 서비스의 구조적 이해를 돕기 위한 **논리적 모델링의 핵심(Core Domain)만 발췌**한 것입니다. 보안 서약 및 비즈니스 기밀 유지를 위해 민감 정보, 결제/정산 상세 스키마 및 물리적 제약 조건은 블라인드(비공개) 처리하였습니다.
 
 * **데이터 모델링 포인트:** 타임딜 커머스의 특성상 특정 시간대에 빈번하게 발생하는 '재고 조회 및 주문' 트랜잭션을 안정적으로 처리하기 위해 정규화를 진행하고, 로컬 상점과 사용자 간의 데이터 정합성을 보장하도록 관계형 데이터베이스 구조를 설계했습니다.
-* 
 
   
 <br>
