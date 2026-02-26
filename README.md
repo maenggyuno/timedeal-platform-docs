@@ -29,11 +29,11 @@
 ### 🗄️ Database Architecture (Logical ERD)
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/55028921-8b1a-4273-a96b-f247426cb38f" width="48%" alt="Users Table">
-  <img src="https://github.com/user-attachments/assets/4aac2868-e4d3-4e85-9f55-506b7e0c2d50" width="48%" alt="Stores Table">
+  <img src="https://github.com/user-attachments/assets/55028921-8b1a-4273-a96b-f247426cb38f" height="300" alt="Users Table">
+  <img src="https://github.com/user-attachments/assets/4aac2868-e4d3-4e85-9f55-506b7e0c2d50" height="300" alt="Stores Table">
   <br>
-  <img src="https://github.com/user-attachments/assets/97dbb6cd-da06-4337-a7d7-e917e0a333ae" width="48%" alt="Products Table">
-  <img src="https://github.com/user-attachments/assets/ae717098-55ad-45b9-a888-4c2b02e4b457" width="48%" alt="OrderItems Table">
+  <img src="https://github.com/user-attachments/assets/97dbb6cd-da06-4337-a7d7-e917e0a333ae" height="300" alt="Products Table">
+  <img src="https://github.com/user-attachments/assets/ae717098-55ad-45b9-a888-4c2b02e4b457" height="300" alt="OrderItems Table">
 </p>
 
 > 🔒 **Security Notice:** 본 ERD는 서비스의 구조적 이해를 돕기 위한 **논리적 모델링의 핵심(Core Domain)만 발췌**한 것입니다. 보안 서약 및 비즈니스 기밀 유지를 위해 민감 정보, 결제/정산 상세 스키마 및 물리적 제약 조건은 블라인드(비공개) 처리하였습니다.
