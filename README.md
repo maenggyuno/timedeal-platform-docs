@@ -35,10 +35,12 @@
 <br>
 
 ## 🛠️ 3. Tech Stack
-* **Backend:** Java 17, Spring Boot, Spring Security, Spring Data JPA
-* **Database:** MySQL, Redis
-* **Infra & DevOps:** AWS (EC2, S3, CloudFront, EventBridge, Lambda), Cloudflare (DNS, Tunnel), Docker, GitHub Actions
-* **Frontend:** React, Axios
+| 분류 | 기술 스택 |
+| --- | --- |
+| **Backend** | Java 21, Spring Boot, Spring Security, Spring Data JPA |
+| **Database** | MySQL 8.0, Redis |
+| **Infra & DevOps:** | AWS (EC2, S3, CloudFront, EventBridge, Lambda), Cloudflare (DNS, Tunnel), Docker, GitHub Actions |
+| **Frontend** | React, Axios |
 
 <br>
 
