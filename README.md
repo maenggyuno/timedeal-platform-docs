@@ -71,9 +71,10 @@
 * **Issue Template & PR Convention:** 기능 추가, 버그 수정 등 목적에 맞는 템플릿을 고도화하여 리뷰어의 맥락 파악 시간을 단축했습니다.
 * ### 📌 체계적인 이슈 추적 및 문서화 (Issue Tracker & Convention)
 
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/f2edfc23-846e-442e-a97c-27791dc8f791" width="48%" alt="이슈 목록">
-  <img src="https://github.com/user-attachments/assets/d1852706-cfa5-461c-8a2a-be6cb2d82cf6" width="48%" alt="상세 이슈 템플릿">
+  <img src="https://github.com/user-attachments/assets/819f6466-67a6-41b4-9534-88938adb2eea" width="48%" alt="상세 이슈 템플릿">
 </p>
 * * **커밋/이슈 컨벤션:** `[FEAT]`, `[Refactor]`, `[Infra]` 등 직관적인 말머리와 라벨링을 통해 작업의 성격을 명확히 분리하고 추적성을 높였습니다.
 * **상세 템플릿:** 단순한 버그 수정이나 기능 추가를 넘어, '배경/목적 - 기술 스펙 - 체크리스트'로 이어지는 상세 템플릿을 사용하여 작업 전 설계의 타당성을 검증했습니다.
