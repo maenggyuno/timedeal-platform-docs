@@ -17,7 +17,8 @@
 <br>
 
 ## 🏗️ 2. System Architecture
-*(여기에 최종 완성하신 Draw.io 아키텍처 이미지 파일(png)을 업로드해서 삽입해 주세요)*
+![Uploading 동네콕 아키텍처.drawio.png…]()
+
 
 ### 🌐 Domain & Routing Strategy
 * **Frontend (`dongnekok.shop`):** AWS S3와 CloudFront를 연동하여 정적 자산의 글로벌 캐싱 성능을 확보하고 비용을 최적화했습니다. (Cloudflare DNS Only 적용)
