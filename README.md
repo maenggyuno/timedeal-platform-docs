@@ -78,14 +78,14 @@
 
 * **커밋/이슈 컨벤션:** `[FEAT]`, `[Refactor]`, `[Infra]` 등 직관적인 말머리와 라벨링을 통해 작업의 성격을 명확히 분리하고 추적성을 높였습니다.
 * **상세 템플릿:** 단순한 버그 수정이나 기능 추가를 넘어, '배경/목적 - 기술 스펙 - 체크리스트'로 이어지는 상세 템플릿을 사용하여 작업 전 설계의 타당성을 검증했습니다.
-* 
+
 
 ### 🤝 6. Collaboration & Workspace (문서화 및 에셋 관리)
 단순한 코드 공유를 넘어, 실제 스타트업 환경과 동일한 수준의 체계적인 문서화 및 자산 관리 파이프라인을 구축했습니다.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/6c9a7b35-441c-4f54-a01b-08ccdf688eb7" width="48%" alt="노션 워크스페이스">
-  <img src="여기에_구글드라이브_캡처_주소_넣기" width="48%" alt="구글 드라이브 에셋 관리">
+  <img src="https://github.com/user-attachments/assets/07c8a1ba-6646-4b87-acd0-ccaa2b70d1c3" width="48%" alt="구글 드라이브 에셋 관리">
 </p>
 
 * **Notion 기반 사내 위키:** 기술(Architecture, ERD, API) 문서뿐만 아니라 기획, 영업(상생 협력 의향서) 등 목적별로 문서를 카테고리화하여 중앙 집중식으로 관리합니다.
