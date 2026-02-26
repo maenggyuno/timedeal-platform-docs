@@ -68,5 +68,14 @@
 
 단순한 코드 공유를 넘어, 실제 비즈니스 환경과 동일한 협업 파이프라인을 구축하여 프로젝트를 운영했습니다.
 
-* **Issue Template & PR Convention:** 기능 추가, 버그 수정 등 목적에 맞는 템플릿을 고도화하여 리뷰어의 맥락 파악 시간을 단축했습니다. *(여기에 이슈 템플릿 캡처 이미지 삽입 추천)*
+* **Issue Template & PR Convention:** 기능 추가, 버그 수정 등 목적에 맞는 템플릿을 고도화하여 리뷰어의 맥락 파악 시간을 단축했습니다.
+* ### 📌 체계적인 이슈 추적 및 문서화 (Issue Tracker & Convention)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f2edfc23-846e-442e-a97c-27791dc8f791" width="48%" alt="이슈 목록">
+  <img src="https://github.com/user-attachments/assets/d1852706-cfa5-461c-8a2a-be6cb2d82cf6" width="48%" alt="상세 이슈 템플릿">
+</p>
+* * **커밋/이슈 컨벤션:** `[FEAT]`, `[Refactor]`, `[Infra]` 등 직관적인 말머리와 라벨링을 통해 작업의 성격을 명확히 분리하고 추적성을 높였습니다.
+* **상세 템플릿:** 단순한 버그 수정이나 기능 추가를 넘어, '배경/목적 - 기술 스펙 - 체크리스트'로 이어지는 상세 템플릿을 사용하여 작업 전 설계의 타당성을 검증했습니다.
+* 
 * **Workspace:** Jira, Slack, Notion을 연동하여 티켓 기반의 스프린트를 관리하고 API 명세서를 동기화했습니다. *(여기에 노션 워크스페이스 캡처 이미지 삽입 추천)*
