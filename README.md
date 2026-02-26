@@ -53,7 +53,13 @@
 
 <br>
 
-## 🔥 4. Key Experience & Troubleshooting
+## ✨ 4. Key Features
+* **타임딜 핵심 로직:** 유통기한 임박 상품의 실시간 재고 관리 및 타임 세일 자동화
+* **위치 기반 서비스:** 사용자 위치 기반의 하이퍼로컬 상점 큐레이션 및 지도 연동
+* **보안 특화:** Cloudflare Zero Trust 기반의 인프라 보호 및 서버리스 무결성 검증 파이프라인
+* **관리자 백오피스:** 상점주를 위한 직관적인 대시보드 및 주문 처리 시스템
+
+## 🔥 5. Key Experience & Troubleshooting
 
 ### 1️⃣ 린 스타트업 기반 MVP 검증 및 비즈니스 문제 해결 [[🔗 MVP 검증 기록](https://velog.io/@mgo0415/%EB%8F%99%EB%84%A4%EC%BD%95-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%BD%94%EB%94%A9%EB%B3%B4%EB%8B%A4-%EB%A8%BC%EC%A0%80-%EB%8F%99%EB%84%A4-%EB%B9%B5%EC%A7%91-%EC%82%AC%EC%9E%A5%EB%8B%98%EB%93%A4%EA%B3%BC-MOU%EB%A5%BC-%EB%A7%BA%EB%8B%A4-MVP-%EA%B3%A0%EA%B0%9D-%EA%B2%80%EC%A6%9D)]
 * **문제:** 타임딜 커머스 특성상 특정 시간대 트래픽 집중이 예상되나, 실제 수요 검증 없이 오버엔지니어링될 위험 인지
@@ -82,7 +88,7 @@
 
 <br>
 
-## 🤝 5. Collaboration & Team Workspace
+## 🤝 6. Collaboration & Team Workspace
 
 단순한 코드 공유를 넘어, 실제 비즈니스 환경과 동일한 협업 파이프라인을 구축하여 프로젝트를 운영했습니다.
 
@@ -98,7 +104,7 @@
 * **상세 템플릿:** 단순한 버그 수정이나 기능 추가를 넘어, '배경/목적 - 기술 스펙 - 체크리스트'로 이어지는 상세 템플릿을 사용하여 작업 전 설계의 타당성을 검증했습니다.
 
 
-### 🤝 6. Collaboration & Workspace (문서화 및 에셋 관리)
+### 🤝 7. Collaboration & Workspace (문서화 및 에셋 관리)
 단순한 코드 공유를 넘어, 실제 스타트업 환경과 동일한 수준의 체계적인 문서화 및 자산 관리 파이프라인을 구축했습니다.
 
 <p align="center">
