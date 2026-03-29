@@ -117,3 +117,5 @@
 * **추후 고도화 계획 (To-be):** Jira 티켓 기반의 스프린트 관리 및 Slack 연동을 통한 CI/CD 배포 자동화 알림 파이프라인 구축 (진행 예정)
 
 <img width="1545" height="813" alt="image" src="https://github.com/user-attachments/assets/2cf38854-d019-4594-a629-688cd2766fad" />
+<img width="524" height="750" alt="image" src="https://github.com/user-attachments/assets/1115f5d2-a2c9-42fd-a799-16681433601a" />
+
