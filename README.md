@@ -115,3 +115,5 @@
 * **Notion 기반 사내 위키:** 기술(Architecture, ERD, API) 문서뿐만 아니라 기획, 영업(상생 협력 의향서) 등 목적별로 문서를 카테고리화하여 중앙 집중식으로 관리합니다.
 * **Google Drive 자산 동기화:** 아키텍처 원본 파일(.drawio), 데이터베이스 산출물 등을 기술 개발 전용 폴더 체계(01_Architecture ~ 04_Infra)로 세분화하여 안전하게 보관 및 링크 연동하고 있습니다.
 * **추후 고도화 계획 (To-be):** Jira 티켓 기반의 스프린트 관리 및 Slack 연동을 통한 CI/CD 배포 자동화 알림 파이프라인 구축 (진행 예정)
+
+<img width="1545" height="813" alt="image" src="https://github.com/user-attachments/assets/2cf38854-d019-4594-a629-688cd2766fad" />
