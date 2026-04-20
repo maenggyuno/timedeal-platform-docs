@@ -34,7 +34,7 @@
 
 * **데이터 모델링 포인트:** 타임딜 커머스의 특성상 특정 시간대에 빈번하게 발생하는 '재고 조회 및 주문' 트랜잭션을 안정적으로 처리하기 위해 정규화를 진행하고, 로컬 상점과 사용자 간의 데이터 정합성을 보장하도록 관계형 데이터베이스 구조를 설계했습니다.
 
-### [[🔗 벨로그 인어남 시리즈 ERD설계 트러블 슈팅 기록](https://velog.io/@mgo0415/series/Project-ERD-%EB%8B%A4%EC%9D%B4%EC%96%B4%EA%B7%B8%EB%9E%A8)]
+### [[🔗 벨로그 인어남 시리즈 ERD 설계 트러블 슈팅 기록](https://velog.io/@mgo0415/series/Project-ERD-%EB%8B%A4%EC%9D%B4%EC%96%B4%EA%B7%B8%EB%9E%A8)]
 
 ### 1️⃣ UX 편의성과 AI 데이터 무결성 충돌 해결: '판매권(Sale Offer)' 추상화 레이어 도입 [[🔗 묶음 상품 아키텍처 설계 기록](https://velog.io/@mgo0415/DB-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EC%82%AC%EC%9E%A5%EB%8B%98%EC%9D%98-%EA%B7%80%EC%B0%AE%EC%9D%8C-vs-AI-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%AC%B4%EA%B2%B0%EC%84%B1-%EB%AC%B6%EC%9D%8C-%EC%83%81%ED%92%88-%EC%84%A4%EA%B3%84%EC%9D%98-%EB%94%9C%EB%A0%88%EB%A7%88%EC%99%80-%ED%95%B4%EA%B2%B0%EC%B1%85)]
 
