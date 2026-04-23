@@ -113,7 +113,7 @@ stateDiagram-v2
     QR_ISSUED --> QR_USED : 🟢 사장님 QR 스캔 성공
     QR_USED --> Order_COMPLETED : 트랜잭션 내 주문 최종 수령 완료
 
-    %% 4. 노쇼 프로세스 (Parallel Termination - 균오님 수정안)
+    %% 4. 노쇼 프로세스 (Parallel Termination)
     %% 배치 스케줄러가 두 도메인을 동시에 각자의 종착역으로 보냄
     Order_READY_FOR_PICKUP --> Order_NO_SHOW : ⏰ 자정 배치 스케줄러 작동 (주문 노쇼 확정)
     QR_ISSUED --> QR_EXPIRED : ⏰ 자정 배치 스케줄러 작동 (QR 수명 만료)
