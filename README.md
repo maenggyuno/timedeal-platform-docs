@@ -51,8 +51,51 @@ O2O 커머스 도메인의 실제 비즈니스 딜레마를 시스템적으로 �
 
 성과: '결제 완료되었으나 픽업 취소됨'과 같은 복합적인 예외 상황에서 발생할 수 있는 데이터 모순(Contradiction)을 원천 차단하고, 새로운 결제 수단이 추가되어도 기존 주문 로직을 수정할 필요가 없는 안전하고 유연한 아키텍처 구축.
 
+### 📊 도메인 상태 관리 설계 (State Management)
 
-  
+비즈니스 로직의 복잡도를 제어하기 위해 주문(Order)과 결제(Payment)의 상태를 분리하여 설계했습니다.
+"과거에는 이 두 가지 흐름을 하나의 숫자형(TINYINT) 컬럼으로 관리하여 매직 넘버 지옥과 예외 처리 불가 문제를 겪었습니다. 이를 Order와 Payment 두 개의 도메인으로 분리하고 상태를 재정의하여, '노쇼 시 환불 불가' 같은 복잡한 비즈니스 정책을 안전하게 수용할 수 있는 아키텍처를 완성했습니다."
+
+#### 1. 주문 상태 (Order Status)
+```mermaid
+stateDiagram-v2
+    %% 시작점
+    [*] --> PENDING_PAYMENT : 주문 생성 (장바구니 결제 요청)
+
+    %% 결제 대기 단계
+    PENDING_PAYMENT --> READY_FOR_PICKUP : 토스페이먼츠 승인 완료
+    PENDING_PAYMENT --> CANCELED : 유저 결제창 이탈 / 승인 실패
+
+    %% 픽업 대기 단계 (핵심 비즈니스 로직 분기)
+    READY_FOR_PICKUP --> COMPLETED : 손님 방문 (사장님이 '픽업 완료' 처리)
+    READY_FOR_PICKUP --> CANCELED : 사장님 직권 취소 (재고 파손 등, 100% 환불)
+    READY_FOR_PICKUP --> NO_SHOW : 미방문 (자정 경과 배치 작업, 환불 불가)
+
+    %% 종료점
+    COMPLETED --> [*]
+    CANCELED --> [*]
+    NO_SHOW --> [*]
+```
+
+#### 2. 결제 상태 (Payment Status)
+```mermaid
+stateDiagram-v2
+    %% 시작점
+    [*] --> READY : 결제창 호출 및 주문 번호 채번
+
+    %% 승인 단계
+    READY --> PAID : PG사 결제 승인 성공 (입금 완료)
+    READY --> FAILED : PG사 결제 승인 실패 (한도 초과, 잔액 부족 등)
+
+    %% 환불 단계
+    PAID --> CANCELED : 주문 취소 발생 (사장님 직권 취소로 인한 PG사 환불 API 호출 성공)
+
+    %% 종료점
+    PAID --> [*]
+    FAILED --> [*]
+    CANCELED --> [*]
+```
+
 <br>
 
 ## 🛠️ 3. Tech Stack
