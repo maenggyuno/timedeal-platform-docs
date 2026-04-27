@@ -65,6 +65,11 @@ stateDiagram-v2
     %% 결제 대기 단계
     PENDING_PAYMENT --> READY_FOR_PICKUP : 토스페이먼츠 승인 완료
     PENDING_PAYMENT --> CANCELED : 유저 결제창 이탈 / 승인 실패
+    note right of READY_FOR_PICKUP
+      [QR 발급]은 상태 변화가 아님. 
+      단순히 현재 상태와 만료시간을 JWT로 암호화하여 화면에 보여줄 뿐!
+      (DB 접근 X)
+    end note
 
     %% 픽업 대기 단계 (핵심 비즈니스 로직 분기)
     READY_FOR_PICKUP --> COMPLETED : 손님 방문 (사장님이 '픽업 완료' 처리)
@@ -94,41 +99,6 @@ stateDiagram-v2
     PAID --> [*]
     FAILED --> [*]
     CANCELED --> [*]
-```
-### 3. 주문 & QR 병렬 (Parallel) 다이어그램
-
-단순한 주문 흐름을 넘어, 인증 토큰인 'QR 코드' 테이블을 1:1로 분리(Isolation)하여 설계했습니다. 
-특히 자정 노쇼 처리 시, 두 도메인이 각자의 생애 주기를 마감하도록(Parallel Termination) 배치 스케줄러 로직을 설계하여 AI 학습 데이터의 순도와 정산 시스템을 보호했습니다.
-
-```mermaid
-stateDiagram-v2
-    %% 1. 결제 완료 직후
-    [*] --> Order_READY_FOR_PICKUP : 결제 승인 완료
-    Order_READY_FOR_PICKUP --> QR_ISSUED : QR 발급 (1:1 매핑)
-
-    %% 2. QR 자체 생애 주기 (Self-Transition)
-    QR_ISSUED --> QR_ISSUED : 🔄 유효시간 연장 (상태가 ISSUED일 때만 가능)
-    
-    %% 3. 정상 프로세스 (Happy Path)
-    QR_ISSUED --> QR_USED : 🟢 사장님 QR 스캔 성공
-    QR_USED --> Order_COMPLETED : 트랜잭션 내 주문 최종 수령 완료
-
-    %% 4. 노쇼 프로세스 (Parallel Termination)
-    %% 배치 스케줄러가 두 도메인을 동시에 각자의 종착역으로 보냄
-    Order_READY_FOR_PICKUP --> Order_NO_SHOW : ⏰ 자정 배치 스케줄러 작동 (주문 노쇼 확정)
-    QR_ISSUED --> QR_EXPIRED : ⏰ 자정 배치 스케줄러 작동 (QR 수명 만료)
-
-    %% 5. 취소 프로세스 (Cancel Path)
-    Order_READY_FOR_PICKUP --> Order_CANCELED : 🔴 사장님 직권 취소
-    Order_CANCELED --> QR_CANCELED : QR 강제 무효화 연동 (환불 진행)
-
-    %% 각 도메인의 독립적인 종착역 (Terminal States)
-    Order_COMPLETED --> [*]
-    Order_NO_SHOW --> [*]
-    Order_CANCELED --> [*]
-    
-    QR_EXPIRED --> [*]
-    QR_CANCELED --> [*]
 ```
 
 <br>
