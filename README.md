@@ -63,8 +63,10 @@ stateDiagram-v2
     [*] --> PENDING_PAYMENT : 주문 생성 (장바구니 결제 요청)
 
     %% 결제 대기 단계
-    PENDING_PAYMENT --> READY_FOR_PICKUP : 토스페이먼츠 승인 완료
+    
+    PENDING_PAYMENT --> CANCELED : 유저 직접 취소 (PATCH /orders/{id}/cancel)
     PENDING_PAYMENT --> CANCELED : 유저 결제창 이탈 / 승인 실패
+    PENDING_PAYMENT --> READY_FOR_PICKUP : 토스페이먼츠 승인 완료
     note right of READY_FOR_PICKUP
       [QR 발급]은 상태 변화가 아님. 
       단순히 현재 상태와 만료시간을 JWT로 암호화하여 화면에 보여줄 뿐!
