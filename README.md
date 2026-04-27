@@ -64,7 +64,7 @@ stateDiagram-v2
 
     %% 결제 대기 단계
     
-    PENDING_PAYMENT --> CANCELED : 유저 직접 취소 (PATCH /orders/{id}/cancel)
+    PENDING_PAYMENT --> CANCELED : 유저 주문 직접 취소
     PENDING_PAYMENT --> CANCELED : 유저 결제창 이탈 / 승인 실패
     PENDING_PAYMENT --> READY_FOR_PICKUP : 토스페이먼츠 승인 완료
     note right of READY_FOR_PICKUP
