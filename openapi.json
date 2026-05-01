@@ -1,0 +1,2236 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "동네콕 API 명세서",
+    "description": "동네콕 서비스의 백엔드 API 문서입니다.\n\n### 🚨 [동네콕 전역 에러 코드(ErrorCode) 명세]\n| Error Code | HTTP Status | Message (설명) |\n| :--- | :--- | :--- |\n| **G001** | 401 UNAUTHORIZED | 로그인이 필요한 서비스입니다. |\n| **G002** | 403 FORBIDDEN | 접근 권한이 없습니다. |\n| **G003** | 400 BAD REQUEST | 입력값이 올바르지 않습니다. |\n| **G004** | 400 BAD REQUEST | 필수 파라미터가 누락되었습니다. |\n| **G005** | 405 METHOD NOT ALLOWED | 지원하지 않는 HTTP 메서드입니다. |\n| **G006** | 500 INTERNAL SERVER ERROR | 서버 내부 오류가 발생했습니다. |\n| **P001** | 404 NOT FOUND | 존재하지 않거나 판매가 종료된 상품입니다. |\n| **P002** | 409 CONFLICT | 남은 재고가 부족합니다. |\n| **P003** | 410 GONE | 이미 삭제된 상품입니다. |\n| **O001** | 404 NOT FOUND | 존재하지 않는 주문입니다. |\n| **O002** | 409 CONFLICT | 이미 취소된 주문입니다. |\n| **O003** | 409 CONFLICT | 픽업 대기 상태가 아닙니다. |\n| **O004** | 409 CONFLICT | 이미 픽업 완료되어 취소할 수 없습니다. |\n| **C001** | 404 NOT FOUND | 장바구니에 존재하지 않는 아이템입니다. |\n| **PAY001** | 400 BAD REQUEST | 결제 승인에 실패했습니다. |\n| **S001** | 404 NOT FOUND | 존재하지 않거나 폐업한 매장입니다. |\n| **S002** | 403 FORBIDDEN | 본인의 매장이 아닙니다. |\n",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Seller - Stores",
+      "description": "판매자용 매장 등록, 관리 및 리뷰 답글 API"
+    },
+    {
+      "name": "Test",
+      "description": "개발 테스트용 API"
+    },
+    {
+      "name": "User - Products",
+      "description": "상품 검색 및 상세 조회 API"
+    },
+    {
+      "name": "Seller",
+      "description": "판매자 계정 관리 API"
+    },
+    {
+      "name": "User",
+      "description": "구매자 계정 관리 API"
+    },
+    {
+      "name": "User - Carts",
+      "description": "사용자 장바구니 CRUD API"
+    },
+    {
+      "name": "User - Orders & Payment",
+      "description": "사용자의 주문 생성, 취소, 결제 준비, QR 픽업 관련 API"
+    },
+    {
+      "name": "Seller - Pickup",
+      "description": "사장님용 주문 관리 및 QR 픽업 처리 API"
+    },
+    {
+      "name": "Auth",
+      "description": "인증 및 토큰 관리 API"
+    },
+    {
+      "name": "Seller - Products",
+      "description": "판매자용 상품 등록, 수정, 삭제 및 조회 API"
+    },
+    {
+      "name": "User - Reviews",
+      "description": "사용자 리뷰 작성, 수정 및 조회 API"
+    },
+    {
+      "name": "User - Stores",
+      "description": "사용자 마트 검색 및 상세 조회 API"
+    },
+    {
+      "name": "Payment - 승인",
+      "description": "토스페이먼츠 최종 결제 승인 API"
+    }
+  ],
+  "paths": {
+    "/api/v2/users": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "유저 회원가입",
+        "description": "구매자 회원가입 및 자동 로그인",
+        "operationId": "signUp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSignUpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "회원가입 완료",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 형식이 잘못되었습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "이미 가입된 이력이 있습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/sellers": {
+      "post": {
+        "tags": [
+          "Seller"
+        ],
+        "summary": "판매자 회원가입",
+        "operationId": "signUp_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerSignUpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "회원가입 완료",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 형식이 잘못되었습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "이미 가입된 이력이 있습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/stores": {
+      "get": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "내 매장 목록 조회",
+        "operationId": "getMyStores",
+        "responses": {
+          "200": {
+            "description": "매장 정보 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "새로운 매장 등록",
+        "operationId": "createStore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerStoreCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "매장 등록 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/stores/{storeId}/reviews/{reviewId}/reply": {
+      "post": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "리뷰 답글 등록",
+        "operationId": "replyToReview",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerReviewReplyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "답글 작성 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/products": {
+      "get": {
+        "tags": [
+          "Seller - Products"
+        ],
+        "summary": "판매자 상품 목록 조회",
+        "description": "내 매장 상품 목록 (검색/필터링 가능)",
+        "operationId": "getSellerProducts",
+        "responses": {
+          "200": {
+            "description": "상품 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Seller - Products"
+        ],
+        "summary": "상품 등록",
+        "operationId": "createProduct",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerProductCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "잘못된 등록 형식입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "상품 등록 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/reviews": {
+      "get": {
+        "tags": [
+          "User - Reviews"
+        ],
+        "summary": "리뷰 목록 조회",
+        "description": "특정 마트 리뷰 또는 내가 쓴 리뷰 조회",
+        "operationId": "getReviews",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "query",
+            "description": "마트 ID (특정 마트 리뷰 조회 시)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "myReviews",
+            "in": "query",
+            "description": "내 리뷰만 보기 여부",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User - Reviews"
+        ],
+        "summary": "리뷰 쓰기",
+        "description": "주문 내역 기반 리뷰 작성",
+        "operationId": "createReview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "리뷰 작성 성공"
+          },
+          "409": {
+            "description": "이미 작성된 리뷰가 존재합니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/payments/confirm": {
+      "post": {
+        "tags": [
+          "Payment - 승인"
+        ],
+        "summary": "상품 결제 승인",
+        "operationId": "confirmPayment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "결제 승인 완료"
+          }
+        }
+      }
+    },
+    "/api/v2/orders": {
+      "get": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "내 주문 목록 전체 조회",
+        "operationId": "getMyOrders",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "상품 주문하기 (결제 대기 생성)",
+        "description": "장바구니 또는 직접 구매",
+        "operationId": "createOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "주문할 상품이 존재하지 않음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 주문 형식",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCreateResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "주문 생성 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCreateResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "상품 품절 또는 타임딜 이벤트 종료",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCreateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/orders/{orderId}/payment": {
+      "post": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "결제 준비 (토스 위젯)",
+        "operationId": "preparePayment",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentReadyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/carts": {
+      "get": {
+        "tags": [
+          "User - Carts"
+        ],
+        "summary": "내 장바구니 조회",
+        "operationId": "getCarts",
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartItemResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User - Carts"
+        ],
+        "summary": "장바구니 담기",
+        "operationId": "addToCart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartAddRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "장바구니 담기 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartAddResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "남은 재고가 부족합니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User - Carts"
+        ],
+        "summary": "장바구니 삭제 (단건/다중)",
+        "operationId": "deleteCartItems",
+        "parameters": [
+          {
+            "name": "cartItemIds",
+            "in": "query",
+            "description": "삭제할 장바구니 아이템 ID 배열 (예: 1,2,3)",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "삭제 완료"
+          },
+          "400": {
+            "description": "잘못된 아이템 번호를 입력하셨습니다."
+          },
+          "404": {
+            "description": "이미 삭제되었거나 존재하지 않는 내역입니다."
+          }
+        }
+      }
+    },
+    "/api/v2/auth/tokens": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그인",
+        "description": "소셜 또는 로컬 로그인",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "비밀번호가 일치하지 않습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "로그인 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "존재하지 않는 계정입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 입력 형식입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그아웃",
+        "description": "Refresh Token 무효화",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "유효하지 않은 토큰입니다."
+          },
+          "200": {
+            "description": "로그아웃 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/users/me": {
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "유저 회원 탈퇴",
+        "description": "토큰 기반 본인 계정 탈퇴",
+        "operationId": "withdraw",
+        "responses": {
+          "200": {
+            "description": "탈퇴가 완료되었습니다."
+          },
+          "401": {
+            "description": "인증 정보가 유효하지 않습니다."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "summary": "유저 개인정보 수정",
+        "operationId": "updateProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "수정 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "수정할 필드 형식이 잘못되었습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/stores/{storeId}": {
+      "patch": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "매장 정보 수정 및 폐업 처리",
+        "operationId": "updateOrDeleteStore",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "description": "매장 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerStoreUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "내 매장이 아닙니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "매장 정보 변경 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/products/{productId}": {
+      "patch": {
+        "tags": [
+          "Seller - Products"
+        ],
+        "summary": "상품 정보 수정 및 삭제 (논리적 삭제)",
+        "operationId": "updateOrDeleteProduct",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "상품 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerProductUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "내 매장의 상품이 아닙니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 수정 형식입니다."
+          },
+          "200": {
+            "description": "상품 수정/삭제 처리 완료"
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/orders/{orderId}/pickup": {
+      "patch": {
+        "tags": [
+          "Seller - Pickup"
+        ],
+        "summary": "QR 스캔 후 픽업 완료 처리",
+        "description": "사장님 앱에서 고객 QR 스캔 후 상태 업데이트",
+        "operationId": "completePickup",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "주문 번호(ID)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QrScanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "QR 코드 형식이 잘못되었습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "이미 픽업이 완료되었거나 취소된 주문입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "존재하지 않는 주문입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "정상적으로 픽업 처리되었습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/reviews/{reviewId}": {
+      "patch": {
+        "tags": [
+          "User - Reviews"
+        ],
+        "summary": "리뷰 수정",
+        "description": "별점 또는 내용 수정 (부분 수정 지원)",
+        "operationId": "updateReview",
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "description": "리뷰 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "잘못된 요청입니다."
+          },
+          "404": {
+            "description": "본인의 리뷰가 아니거나 존재하지 않습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "리뷰 수정 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/orders/{orderId}/cancel": {
+      "patch": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "주문 취소 및 환불",
+        "operationId": "cancelOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "취소 성공"
+          },
+          "404": {
+            "description": "취소할 주문이 없습니다."
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "409": {
+            "description": "이미 취소되었거나 픽업 완료되어 취소 불가"
+          }
+        }
+      }
+    },
+    "/api/v2/carts/{id}": {
+      "patch": {
+        "tags": [
+          "User - Carts"
+        ],
+        "summary": "장바구니 수량 변경",
+        "operationId": "updateCartQuantity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "409": {
+            "description": "남은 재고가 부족합니다."
+          },
+          "200": {
+            "description": "수량 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 아이템 번호를 입력하셨습니다."
+          },
+          "404": {
+            "description": "장바구니에 존재하지 않는 아이템입니다."
+          }
+        }
+      }
+    },
+    "/api/v2/stores": {
+      "get": {
+        "tags": [
+          "User - Stores"
+        ],
+        "summary": "마트 검색 (이름 및 주변 위치)",
+        "description": "키워드 또는 사용자 위치(위도/경도) 기반 검색",
+        "operationId": "searchStores",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "마트 검색어",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "사용자 위도",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "description": "사용자 경도",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "마트 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/stores/{storeId}": {
+      "get": {
+        "tags": [
+          "User - Stores"
+        ],
+        "summary": "마트 상세 조회",
+        "operationId": "getStoreDetail",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "description": "마트 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "존재하지 않거나 폐업한 마트입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "마트 상세 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/products": {
+      "get": {
+        "tags": [
+          "User - Products"
+        ],
+        "summary": "상품 목록 검색 및 필터링 (통합)",
+        "description": "키워드, 카테고리, 마트 ID 조합 검색. 무한 스크롤(lastId) 지원",
+        "operationId": "searchProducts",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "상품 검색어",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "특정 카테고리 ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "storeId",
+            "in": "query",
+            "description": "특정 가게 ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "페이지 번호 (0부터 시작)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "한 페이지당 항목 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "lastId",
+            "in": "query",
+            "description": "무한 스크롤 - 마지막 상품 ID",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "존재하지 않는 가게 또는 카테고리입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "검색 완료",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 검색 형식입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/products/{id}": {
+      "get": {
+        "tags": [
+          "User - Products"
+        ],
+        "summary": "상품 상세 조회",
+        "operationId": "getProductDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "상품 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "잘못된 요청 형식입니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "상세 조회 완료",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "해당 상품을 찾을 수 없습니다. (품절/삭제 등)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/orders/{orderId}": {
+      "get": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "주문 상세 내역 조회",
+        "operationId": "getOrderDetail",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "존재하지 않는 주문 (IDOR 방어)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "상세내역 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/orders/{orderId}/qr": {
+      "get": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "픽업용 일회용 QR 토큰 생성",
+        "operationId": "generateQrToken",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "409": {
+            "description": "READY_FOR_PICKUP 상태가 아님",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrTokenResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrTokenResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "존재하지 않는 주문 또는 내 주문 아님",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrTokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/test/hello": {
+      "get": {
+        "tags": [
+          "Test"
+        ],
+        "summary": "Hello 테스트",
+        "operationId": "sayHello",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "이름",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/me": {
+      "delete": {
+        "tags": [
+          "Seller"
+        ],
+        "summary": "판매자 회원 탈퇴",
+        "description": "매장 폐업 등 관련 정리 작업 포함",
+        "operationId": "withdraw_1",
+        "responses": {
+          "200": {
+            "description": "탈퇴가 완료되었습니다."
+          },
+          "401": {
+            "description": "인증 정보가 유효하지 않습니다."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserSignUpRequest": {
+        "required": [
+          "age",
+          "email",
+          "name",
+          "phoneNumber",
+          "socialLoginId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "이름",
+            "example": "인어남"
+          },
+          "age": {
+            "type": "integer",
+            "description": "나이",
+            "format": "int32",
+            "example": 24
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "전화번호 (11자리)",
+            "example": "01012345678"
+          },
+          "gender": {
+            "type": "string",
+            "description": "성별 (MALE / FEMALE)",
+            "example": "MALE"
+          },
+          "address": {
+            "type": "string",
+            "description": "주소",
+            "example": "경기도 안성시"
+          },
+          "email": {
+            "type": "string",
+            "description": "이메일",
+            "example": "gyuno@example.com"
+          },
+          "socialLoginId": {
+            "type": "string",
+            "description": "소셜 로그인 고유 ID",
+            "example": "kakao_98765"
+          }
+        },
+        "description": "구매자(유저) 회원가입 요청 DTO"
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access Token (JWT)",
+            "example": "eyJhbGciOiJIUzI1NiIs..."
+          }
+        },
+        "description": "로그인 성공 응답"
+      },
+      "SellerSignUpRequest": {
+        "required": [
+          "businessNumber",
+          "email",
+          "name",
+          "socialLoginId",
+          "storeName"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "대표자 이름",
+            "example": "맹사장"
+          },
+          "businessNumber": {
+            "type": "string",
+            "description": "사업자 등록번호",
+            "example": "123-45-67890"
+          },
+          "storeName": {
+            "type": "string",
+            "description": "가게 이름",
+            "example": "안성 갓 구운 빵집"
+          },
+          "email": {
+            "type": "string",
+            "description": "연락용 이메일",
+            "example": "seller@example.com"
+          },
+          "socialLoginId": {
+            "type": "string",
+            "description": "소셜 로그인 고유 ID",
+            "example": "google_112233"
+          }
+        },
+        "description": "판매자 회원가입 요청 DTO"
+      },
+      "SellerStoreCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "매장명",
+            "example": "균오네 빵집 2호점"
+          },
+          "operationHours": {
+            "type": "string",
+            "description": "운영 시간",
+            "example": "10:00 - 20:00"
+          },
+          "description": {
+            "type": "string",
+            "description": "매장 소개"
+          }
+        },
+        "description": "새로운 매장 입점(등록) 요청"
+      },
+      "SellerReviewReplyRequest": {
+        "type": "object",
+        "properties": {
+          "replyContent": {
+            "type": "string",
+            "description": "답글 내용",
+            "example": "방문해 주셔서 감사합니다!"
+          }
+        },
+        "description": "리뷰 답글 작성 요청"
+      },
+      "SellerProductCreateRequest": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "integer",
+            "description": "카테고리 ID",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "상품명",
+            "example": "단팥빵"
+          },
+          "price": {
+            "type": "integer",
+            "description": "가격",
+            "format": "int32",
+            "example": 2000
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "초기 재고",
+            "format": "int32",
+            "example": 100
+          },
+          "expireDate": {
+            "type": "string",
+            "description": "유통 기한",
+            "example": "2026-04-29T23:59:59"
+          }
+        },
+        "description": "사장님 상품 등록 요청"
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "에러 코드 목록:\n- G001~G006: Global (권한, 파라미터, 서버 에러 등)\n- P001~P003: Product (상품 없음, 재고 부족, 삭제됨)\n- O001~O004: Order (주문 없음, 취소됨, 픽업 불가 등)\n- C001: Cart (장바구니 아이템 없음)\n- PAY001: Payment (결제 실패)\n- S001~S002: Store (가게 없음, 권한 없음)",
+            "example": "P001"
+          },
+          "message": {
+            "type": "string",
+            "description": "에러 메시지 상세 내용",
+            "example": "존재하지 않거나 판매가 종료된 상품입니다."
+          }
+        },
+        "description": "공통 에러 응답"
+      },
+      "ReviewCreateRequest": {
+        "type": "object",
+        "properties": {
+          "orderReceiptId": {
+            "type": "integer",
+            "description": "주문 번호(ID) - 어떤 주문에 대한 리뷰인지",
+            "format": "int64",
+            "example": 105
+          },
+          "rating": {
+            "type": "integer",
+            "description": "별점 (1~5)",
+            "format": "int32",
+            "example": 5
+          },
+          "content": {
+            "type": "string",
+            "description": "리뷰 내용",
+            "example": "빵이 정말 맛있어요!"
+          }
+        },
+        "description": "리뷰 작성 요청"
+      },
+      "PaymentConfirmRequest": {
+        "required": [
+          "amount",
+          "orderId",
+          "paymentKey"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "토스 주문 ID (toss_order_id)",
+            "example": "ORD-105-8f3k9"
+          },
+          "paymentKey": {
+            "type": "string",
+            "description": "토스 결제 키",
+            "example": "toss_abc123"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "최종 결제 금액",
+            "format": "int32",
+            "example": 13500
+          }
+        }
+      },
+      "OrderCreateRequest": {
+        "type": "object",
+        "properties": {
+          "cartItemIds": {
+            "type": "array",
+            "description": "장바구니 아이템 ID 목록 (장바구니 주문 시)",
+            "items": {
+              "type": "integer",
+              "description": "장바구니 아이템 ID 목록 (장바구니 주문 시)",
+              "format": "int64"
+            }
+          },
+          "productId": {
+            "type": "integer",
+            "description": "상품 ID (바로 구매 시)",
+            "format": "int64"
+          },
+          "productQuantity": {
+            "type": "integer",
+            "description": "수량 (바로 구매 시)",
+            "format": "int32"
+          }
+        }
+      },
+      "OrderCreateResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PaymentReadyResponse": {
+        "type": "object",
+        "properties": {
+          "tossOrderId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderName": {
+            "type": "string"
+          },
+          "successUrl": {
+            "type": "string"
+          },
+          "failUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "CartAddRequest": {
+        "required": [
+          "cartQuantity",
+          "productId"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "description": "상품 ID",
+            "format": "int64",
+            "example": 10
+          },
+          "cartQuantity": {
+            "type": "integer",
+            "description": "담을 수량",
+            "format": "int32",
+            "example": 2
+          }
+        }
+      },
+      "CartAddResponse": {
+        "type": "object",
+        "properties": {
+          "cartItemId": {
+            "type": "integer",
+            "description": "생성된 장바구니 아이템 ID",
+            "format": "int64",
+            "example": 42
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": [
+          "provider",
+          "socialId"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "소셜 제공자 (KAKAO, GOOGLE, LOCAL 등)",
+            "example": "KAKAO"
+          },
+          "socialId": {
+            "type": "string",
+            "description": "소셜 로그인 고유 ID",
+            "example": "kakao_98765"
+          },
+          "password": {
+            "type": "string",
+            "description": "비밀번호 (LOCAL 로그인 시에만 사용)",
+            "example": "password123!"
+          }
+        },
+        "description": "로그인 요청 DTO"
+      },
+      "UserUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "수정할 이름",
+            "example": "인어남(수정)"
+          },
+          "age": {
+            "type": "integer",
+            "description": "수정할 나이",
+            "format": "int32",
+            "example": 25
+          },
+          "address": {
+            "type": "string",
+            "description": "수정할 주소",
+            "example": "서울 강남구"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "수정할 전화번호",
+            "example": "01098765432"
+          }
+        },
+        "description": "구매자 정보 수정 요청 (부분 수정)"
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "유저 ID",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "이름",
+            "example": "인어남"
+          },
+          "age": {
+            "type": "integer",
+            "description": "나이",
+            "format": "int32",
+            "example": 24
+          },
+          "email": {
+            "type": "string",
+            "description": "이메일",
+            "example": "gyuno@example.com"
+          },
+          "address": {
+            "type": "string",
+            "description": "주소",
+            "example": "경기도 안성시"
+          }
+        },
+        "description": "구매자 정보 응답 DTO"
+      },
+      "SellerStoreUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "operationHours": {
+            "type": "string",
+            "description": "운영 시간 변경",
+            "example": "09:00 - 21:00"
+          },
+          "description": {
+            "type": "string",
+            "description": "매장 소개 변경"
+          },
+          "isClosed": {
+            "type": "boolean",
+            "description": "폐업 처리 여부 (true면 논리적 삭제)",
+            "example": false
+          }
+        },
+        "description": "매장 정보 수정/폐업 요청"
+      },
+      "SellerProductUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "integer",
+            "description": "변경할 가격",
+            "format": "int32",
+            "example": 2500
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "추가/변경할 수량",
+            "format": "int32",
+            "example": 50
+          }
+        },
+        "description": "사장님 상품 수정 요청"
+      },
+      "QrScanRequest": {
+        "required": [
+          "qrToken"
+        ],
+        "type": "object",
+        "properties": {
+          "qrToken": {
+            "type": "string",
+            "description": "스캔한 일회용 QR 토큰 문자열",
+            "example": "eyJhbGciOiJIUzI1NiIs..."
+          }
+        }
+      },
+      "ReviewUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer",
+            "description": "별점 (1~5)",
+            "format": "int32",
+            "example": 4
+          },
+          "content": {
+            "type": "string",
+            "description": "리뷰 내용",
+            "example": "맛있지만 픽업이 조금 늦었어요."
+          }
+        },
+        "description": "리뷰 수정 요청 (별점/내용 모두)"
+      },
+      "CancelRequest": {
+        "type": "object",
+        "properties": {
+          "cancelReason": {
+            "type": "string",
+            "description": "취소 사유",
+            "example": "단순 변심"
+          }
+        }
+      },
+      "CartUpdateRequest": {
+        "required": [
+          "cartQuantity"
+        ],
+        "type": "object",
+        "properties": {
+          "cartQuantity": {
+            "type": "integer",
+            "description": "변경할 수량",
+            "format": "int32",
+            "example": 3
+          }
+        }
+      },
+      "StoreSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "마트 ID",
+            "format": "int64",
+            "example": 5
+          },
+          "name": {
+            "type": "string",
+            "description": "마트명",
+            "example": "균오네 빵집"
+          },
+          "lat": {
+            "type": "number",
+            "description": "마트 위도",
+            "format": "double",
+            "example": 37.5665
+          },
+          "lng": {
+            "type": "number",
+            "description": "마트 경도",
+            "format": "double",
+            "example": 126.978
+          }
+        }
+      },
+      "StoreDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "마트 ID",
+            "format": "int64",
+            "example": 5
+          },
+          "name": {
+            "type": "string",
+            "description": "마트명",
+            "example": "균오네 빵집"
+          },
+          "lat": {
+            "type": "number",
+            "description": "마트 위도",
+            "format": "double",
+            "example": 37.5665
+          },
+          "lng": {
+            "type": "number",
+            "description": "마트 경도",
+            "format": "double",
+            "example": 126.978
+          },
+          "operationHours": {
+            "type": "string",
+            "description": "운영 시간",
+            "example": "09:00 - 21:00"
+          },
+          "description": {
+            "type": "string",
+            "description": "가게 소개글",
+            "example": "당일 생산, 당일 판매 원칙!"
+          }
+        }
+      },
+      "ReviewResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "리뷰 ID",
+            "format": "int64",
+            "example": 1
+          },
+          "authorName": {
+            "type": "string",
+            "description": "작성자 이름",
+            "example": "맹균오"
+          },
+          "rating": {
+            "type": "integer",
+            "description": "별점",
+            "format": "int32",
+            "example": 5
+          },
+          "content": {
+            "type": "string",
+            "description": "리뷰 내용",
+            "example": "최고입니다!"
+          },
+          "sellerReply": {
+            "type": "string",
+            "description": "사장님 답글 (없으면 null)",
+            "nullable": true
+          }
+        },
+        "description": "리뷰 목록 조회 응답"
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSummaryResponse"
+            }
+          },
+          "nextCursor": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProductSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productExpireDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "productPresignedUrl": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SimpleInfo"
+          },
+          "store": {
+            "$ref": "#/components/schemas/SimpleInfo"
+          }
+        }
+      },
+      "SimpleInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productExpireDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "productPresignedUrl": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SimpleInfo"
+          },
+          "store": {
+            "$ref": "#/components/schemas/SimpleInfo"
+          },
+          "productQuantity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OrderSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPrice": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "QrTokenResponse": {
+        "type": "object",
+        "properties": {
+          "qrToken": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CartItemResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productPresignedUrl": {
+            "type": "string"
+          },
+          "mart": {
+            "$ref": "#/components/schemas/SimpleInfo"
+          }
+        }
+      }
+    }
+  }
+}
