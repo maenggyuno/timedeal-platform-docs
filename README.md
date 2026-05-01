@@ -110,6 +110,8 @@ stateDiagram-v2
 *   **설계 포인트:** 
     *   **전역 에러 체계 문서화:** `GlobalExceptionHandler`와 연동된 공통 에러 코드(ErrorCode)를 명시하여 프론트엔드 예외 처리 가이드 제공
     *   **협업 최적화:** 모든 API 응답에 대한 명확한 스키마(Schema)와 예시 데이터(Example)를 정의하여 커뮤니케이션 비용 최소화
+    *   <img width="582" height="618" alt="image" src="https://github.com/user-attachments/assets/f2c78659-d926-4060-a533-f163e02be1cc" />
+
 
 ---
 
