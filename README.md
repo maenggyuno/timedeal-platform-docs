@@ -103,6 +103,16 @@ stateDiagram-v2
     CANCELED --> [*]
 ```
 
+## 📖 API Documentation & Specification
+프론트엔드 협업 효율성 및 문서 신뢰성을 위해 **OpenAPI 3.0(Swagger/Redoc)** 기반의 자동화된 명세 시스템을 구축했습니다.
+
+*   **API 명세서 (Redoc):** [https://maenggyuno.github.io/dongnekok-docs/](https://maenggyuno.github.io/dongnekok-docs/)
+*   **설계 포인트:** 
+    *   **전역 에러 체계 문서화:** `GlobalExceptionHandler`와 연동된 공통 에러 코드(ErrorCode)를 명시하여 프론트엔드 예외 처리 가이드 제공
+    *   **협업 최적화:** 모든 API 응답에 대한 명확한 스키마(Schema)와 예시 데이터(Example)를 정의하여 커뮤니케이션 비용 최소화
+
+---
+
 <br>
 
 ## 🛠️ 3. Tech Stack
