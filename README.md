@@ -115,6 +115,8 @@ stateDiagram-v2
 
 ---
 
+[![결제 및 취소 시퀀스 다이어그램](./docs/payment-sequence.svg)](./docs/payment-sequence.svg)
+
 <br>
 
 ## 🛠️ 3. Tech Stack
