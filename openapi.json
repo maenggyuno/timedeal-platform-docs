@@ -1317,7 +1317,7 @@
           "address": {
             "type": "string",
             "description": "주소",
-            "example": "경기도 안성시"
+            "example": "경기도"
           },
           "email": {
             "type": "string",
@@ -1356,7 +1356,7 @@
           "name": {
             "type": "string",
             "description": "대표자 이름",
-            "example": "맹사장"
+            "example": "김사장"
           },
           "businessNumber": {
             "type": "string",
@@ -1387,7 +1387,7 @@
           "name": {
             "type": "string",
             "description": "매장명",
-            "example": "균오네 빵집 2호점"
+            "example": "빵집 2호점"
           },
           "operationHours": {
             "type": "string",
@@ -1676,7 +1676,7 @@
           "address": {
             "type": "string",
             "description": "주소",
-            "example": "경기도 안성시"
+            "example": "경기도"
           }
         },
         "description": "구매자 정보 응답 DTO"
@@ -1813,7 +1813,7 @@
           "name": {
             "type": "string",
             "description": "마트명",
-            "example": "균오네 빵집"
+            "example": "빵집"
           },
           "lat": {
             "type": "number",
@@ -1841,7 +1841,7 @@
           "name": {
             "type": "string",
             "description": "마트명",
-            "example": "균오네 빵집"
+            "example": "빵집"
           },
           "lat": {
             "type": "number",
@@ -1879,7 +1879,7 @@
           "authorName": {
             "type": "string",
             "description": "작성자 이름",
-            "example": "맹균오"
+            "example": "홍길동"
           },
           "rating": {
             "type": "integer",
