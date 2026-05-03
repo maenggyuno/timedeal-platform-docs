@@ -115,7 +115,7 @@ stateDiagram-v2
 
 ---
 
-[![결제 및 취소 시퀀스 다이어그램](./payment-sequence.drawio.svg)]
+### [시퀀스 다이어그램]
 
 ### 💳 주문/결제 및 오프라인 QR 픽업 통합 흐름
 ```mermaid
