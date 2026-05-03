@@ -116,6 +116,234 @@ stateDiagram-v2
 ---
 
 [![결제 및 취소 시퀀스 다이어그램](./payment-sequence.drawio.svg)]
+
+### 💳 주문/결제 및 오프라인 QR 픽업 통합 흐름
+```mermaid
+---
+title: 주문/결제 및 오프라인 QR 픽업 통합 흐름
+---
+
+sequenceDiagram
+autonumber
+actor User as 구매자(프론트엔드)
+participant BE as 백엔드(Spring)
+participant DB as Database/Redis
+participant PG as 결제사(Toss)
+actor Seller as 사장님(앱)
+
+rect rgb(240, 248, 255)
+    note right of User: 1. 주문 생성 및 결제 준비 (tossOrderId 분리)
+    User->>BE: [POST] /api/v2/orders <br> (장바구니/바로구매 상품 정보)
+    BE->>DB: 빵 재고 조회 및 차감 (동시성 제어)
+    BE->>DB: 주문(Order) 데이터 생성 (PENDING)
+    BE-->>User: 201 Created (내부 orderId: 105 반환)
+    note right of User: 1. 결제 재료 준비 (우리 백엔드 API)
+    User->>BE: [GET] /api/v2/orders/105/payment <br> (결제 위젯용 데이터 요청)
+    BE->>BE: tossOrderId (유추 불가능한 난수) 생성
+    BE-->>User: 200 OK <br> (tossOrderId, amount 반환)
+end
+
+rect rgb(255, 235, 238)
+    note right of User: 2. 토스 결제창 호출 (프론트 SDK) 및 검증
+    note over User, PG: 💻 프론트엔드 JS: tossPayments.requestPayment(...) 실행
+    User->>PG: 토스 결제창 UI 호출 (tossOrderId, amount 전달)
+    PG-->>User: 고객 인증 완료 (paymentKey 반환)
+
+    note over User, BE: 🛡️ 여기서부터 최종 승인 단계
+    User->>BE: [POST] /api/v2/payments/confirm <br> (우리 서버로 paymentKey, amount 전달)
+    BE->>DB: DB의 total_price와 프론트가 보낸 amount 대조 (위변조 방어)
+
+    alt 금액 불일치
+        BE-->>User: 400 Bad Request (결제 차단)
+    else 금액 일치 (검증 통과)
+        note over BE, PG: 🔒 Spring Boot ➔ Toss Server (Secret Key 사용)
+        BE->>PG: [POST] <https://api.tosspayments.com/v1/payments/confirm> <br> (paymentKey, orderId, amount 전송)
+        PG-->>BE: 200 OK (최종 결제 승인 및 영수증 반환)
+        BE->>DB: 결제 데이터 생성 및 주문 상태 변경 (READY_FOR_PICKUP)
+        BE-->>User: 200 OK (우리 서비스 결제 성공 응답)
+    end
+end
+
+rect rgb(255, 250, 205)
+    note right of User: 3. 장바구니 뒷정리
+    opt 장바구니 구매인 경우
+        BE->>DB: 결제 완료된 상품 장바구니에서 삭제 (Soft Delete)
+    end
+end
+
+rect rgb(240, 255, 240)
+    note right of User: 4. 오프라인 매장 방문 및 QR 발급
+    User->>BE: [POST] /api/v2/orders/105/qr <br> (일회용 토큰 요청)
+    BE->>DB: 주문 조회 및 상태 검증
+
+    alt 정상 상태
+        BE->>BE: 일회용 QR 토큰 생성 (CPU 작업)
+        BE->>DB: 생성된 토큰 Redis에 저장 (TTL: 3분, I/O 작업)
+        BE-->>User: 200 OK { qrToken, expiresAt }
+        User->>User: QR 코드 화면에 렌더링
+    end
+end
+
+rect rgb(245, 245, 245)
+    note right of User: 5. 픽업 스캔 완료
+    User->>Seller: 사장님께 QR 코드 제시
+    Seller->>BE: [POST] /api/v2/orders/pickup <br> (qrToken 전송)
+    BE->>DB: Redis 토큰 검증 및 DB 상태 변경 (PICKED_UP)
+    BE-->>Seller: 200 OK (픽업 성공)
+end
+```
+
+<br>
+### 💳 주문 취소 및 토스페이먼츠 환불 흐름
+
+```mermaid 
+---
+title: 주문 취소 및 토스페이먼츠 환불 흐름
+---
+
+sequenceDiagram
+autonumber
+actor User as 구매자(프론트)
+participant BE as 백엔드(Spring)
+participant DB as Database
+participant PG as 결제사(Toss)
+
+note right of User: 프론트엔드는 취소할 상품 목록(cancelItems)을 담아 단일 API 호출
+User->>BE: [POST] /api/v2/orders/{orderId}/cancel <br> { cancelItems, cancelReason }
+
+note over BE, DB: 🛡️ 동시성 방어: 배타적 락(Pessimistic Lock) 적용
+BE->>DB: 주문(Order) 및 상세 내역(OrderItem) 조회
+BE->>BE: 취소 요청된 상품들의 총합 금액(cancelAmount) 계산
+
+alt 상태가 PENDING (결제 승인 전)
+    rect rgb(240, 248, 255)
+        BE->>DB: 주문 및 해당 상품 상태 CANCELED 변경
+        BE->>DB: 취소된 빵 재고 롤백 (+N)
+        BE-->>User: 200 OK (결제 전 단순 취소 완료)
+    end
+
+else 상태가 READY_FOR_PICKUP (결제 완료됨)
+
+    alt 🅰️ 전액 취소 (cancelAmount == totalAmount)
+        rect rgb(255, 235, 238)
+            note over BE, PG: URL은 동일하지만 Body에 cancelAmount를 빼고 보냄
+            BE->>PG: [POST] <https://api.tosspayments.com/v1/payments/{paymentKey}/cancel> <br> Body: { "cancelReason": "..." }
+            PG-->>BE: 200 OK (전액 환불 성공)
+            BE->>DB: 💡 [전액 취소] 전체 주문(Order) 상태 ➔ CANCELED
+            BE->>DB: 💡 전체 상세 상품(OrderItem) 상태 ➔ CANCELED
+            BE->>DB: 모든 빵 재고 롤백 (+N)
+        end
+
+    else 🅱️ 부분 취소 (cancelAmount < totalAmount)
+        rect rgb(255, 250, 205)
+            note over BE, PG: Body에 취소할 금액(cancelAmount)을 명시해서 보냄
+            BE->>PG: [POST] <https://api.tosspayments.com/v1/payments/{paymentKey}/cancel> <br> Body: { "cancelReason": "...", "cancelAmount": 2000 }
+            PG-->>BE: 200 OK (부분 환불 성공)
+            BE->>DB: 💡 [부분 취소] 전체 주문(Order) 상태 ➔ 유지 (READY_FOR_PICKUP)
+            BE->>DB: 💡 취소 요청된 상세 상품(OrderItem)만 상태 ➔ CANCELED
+            BE->>DB: 부분 취소된 빵만 재고 롤백 (+N)
+        end
+    end
+
+    BE-->>User: 200 OK (환불 완료 및 남은 픽업 안내)
+
+else 이미 픽업이 완료되었거나 이미 취소된 상태
+    rect rgb(245, 245, 245)
+        BE-->>User: 409 Conflict 또는 400 Bad Request (취소 불가 상태 예외)
+    end
+end
+```
+<br>
+### 🌐 OAuth 2.0 소셜 로그인 및 토큰 생명주기
+
+```mermaid
+---
+title: OAuth 2.0 소셜 로그인 및 토큰 생명주기
+---
+sequenceDiagram
+autonumber
+actor User as 사용자
+participant FE as 프론트엔드
+participant BE as 백엔드(Spring)
+participant DB as Database
+participant OAuth as 소셜 서버(네이버/구글)
+
+rect rgb(240, 248, 255)
+    note right of User: 1. 소셜 로그인 인증 요청 (프론트엔드의 역할)
+    User->>FE: '네이버로 로그인' 버튼 클릭
+    FE->>OAuth: 네이버 로그인 페이지로 리다이렉트 (Client ID 포함)
+    OAuth-->>User: 로그인 팝업창 표시
+    User->>OAuth: ID/PW 입력 및 정보 제공 동의
+    OAuth-->>FE: 🔑 Authorization Code 발급 (리다이렉트 URI로 전달)
+end
+
+rect rgb(255, 240, 245)
+    note right of User: 2. 토큰 교환 및 유저 검증 (백엔드의 역할 - 보안 핵심)
+    note over FE, BE: 프론트는 발급받은 Code만 백엔드로 넘김 (socialId 직접 넘기면 안 됨!)
+    FE->>BE: [POST] /api/v2/auth/login/naver <br> { "code": "abc1234..." }
+
+    note over BE, OAuth: 🔒 백엔드 ➔ 소셜 서버 직접 통신 (Secret Key 사용)
+    BE->>OAuth: [POST] Code를 주면서 네이버 Access Token 요청
+    OAuth-->>BE: 네이버 Access Token 발급
+
+    BE->>OAuth: [GET] 네이버 Access Token으로 유저 프로필(이메일, 이름 등) 요청
+    OAuth-->>BE: 유저 프로필 정보 (이메일, 고유 식별자 등) 반환
+end
+
+rect rgb(240, 255, 240)
+    note right of User: 3. 동네콕 전용 토큰 발급 (자동 회원가입/로그인)
+    BE->>DB: 전달받은 이메일/식별자로 기존 가입 유저인지 조회
+
+    alt 신규 유저인 경우 (자동 회원가입)
+        BE->>DB: 유저 정보 새로 저장 (Role: USER)
+    end
+
+    BE->>BE: 🔑 동네콕 전용 Access Token & Refresh Token 생성
+    BE->>DB: Refresh Token 저장 (보안을 위해 DB나 Redis에 저장)
+    BE-->>FE: 200 OK <br> (Body: Access Token / Cookie: Refresh Token)
+    FE->>User: 메인 화면으로 이동 (로그인 성공)
+end
+
+rect rgb(255, 250, 205)
+     note right of User: 시나리오 A: 토큰 재발급 (Access Token 자동 갱신)
+     User->>BE: [GET] /api/v2/orders <br> (Header: 만료된 AccessToken)
+     BE-->>User: 401 Unauthorized (토큰 만료 에러코드 반환)
+        
+     note over User, BE: 💡 프론트엔드 로직: 401 에러를 낚아채서(Interceptor) 몰래 재발급 요청
+     User->>BE: [POST] /api/v2/auth/reissue <br> (Cookie: RefreshToken)
+     BE->>DB: Redis에서 RefreshToken 존재 및 일치 여부 확인
+        
+     alt 유효하지 않거나 만료된 Refresh Token
+         BE-->>User: 401 Unauthorized (재로그인 필요)
+         User->>User: 로그인 페이지로 강제 이동
+     else 유효한 Refresh Token
+         BE->>BE: 새로운 Access Token (및 새 Refresh Token) 생성
+         BE->>DB: 기존 RefreshToken 덮어쓰기 (RTR 기법 적용 권장)
+         BE-->>User: 200 OK <br> (Body: 새 AccessToken 반환)
+            
+         note over User, BE: 💡 프론트엔드 로직: 발급받은 새 토큰으로 아까 실패했던 요청 다시 쏘기
+         User->>BE: [GET] /api/v2/orders <br> (Header: 새로운 AccessToken)
+         BE-->>User: 200 OK (정상 데이터 반환)
+      end
+  end
+
+  rect rgb(240, 248, 255)
+     note right of User: 시나리오 B: 완전한 로그아웃 처리 (블랙리스트)
+     User->>User: '로그아웃' 버튼 클릭
+     User->>BE: [POST] /api/v2/auth/logout <br> (Header: AccessToken)
+        
+     BE->>DB: 1. 해당 유저의 Refresh Token을 Redis에서 영구 삭제
+        
+     note over BE, DB: 🛡️ 보안의 핵심: 탈취당한 Access Token 방어
+     BE->>BE: 현재 Access Token의 남은 만료 시간 계산
+     BE->>DB: 2. 남은 시간만큼 해당 Access Token을 Redis '블랙리스트'에 등록
+        
+     BE-->>User: 200 OK (로그아웃 완료 응답)
+     User->>User: 브라우저에 저장된 모든 토큰 삭제 후 로그인 화면 이동
+  end
+```
+
+
 <br>
 
 ## 🛠️ 3. Tech Stack
