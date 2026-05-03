@@ -13,56 +13,52 @@
   ],
   "tags": [
     {
-      "name": "Seller - Stores",
-      "description": "판매자용 매장 등록, 관리 및 리뷰 답글 API"
-    },
-    {
-      "name": "Test",
-      "description": "개발 테스트용 API"
-    },
-    {
-      "name": "User - Products",
-      "description": "상품 검색 및 상세 조회 API"
-    },
-    {
-      "name": "Seller",
-      "description": "판매자 계정 관리 API"
-    },
-    {
       "name": "User",
       "description": "구매자 계정 관리 API"
-    },
-    {
-      "name": "User - Carts",
-      "description": "사용자 장바구니 CRUD API"
-    },
-    {
-      "name": "User - Orders & Payment",
-      "description": "사용자의 주문 생성, 취소, 결제 준비, QR 픽업 관련 API"
-    },
-    {
-      "name": "Seller - Pickup",
-      "description": "사장님용 주문 관리 및 QR 픽업 처리 API"
     },
     {
       "name": "Auth",
       "description": "인증 및 토큰 관리 API"
     },
     {
-      "name": "Seller - Products",
-      "description": "판매자용 상품 등록, 수정, 삭제 및 조회 API"
-    },
-    {
-      "name": "User - Reviews",
-      "description": "사용자 리뷰 작성, 수정 및 조회 API"
+      "name": "User - Carts",
+      "description": "사용자 장바구니 CRUD API"
     },
     {
       "name": "User - Stores",
       "description": "사용자 마트 검색 및 상세 조회 API"
     },
     {
-      "name": "Payment - 승인",
-      "description": "토스페이먼츠 최종 결제 승인 API"
+      "name": "User - Products",
+      "description": "상품 검색 및 상세 조회 API"
+    },
+    {
+      "name": "User - Reviews",
+      "description": "사용자 리뷰 작성, 수정 및 조회 API"
+    },
+    {
+      "name": "User - Orders & Payment",
+      "description": "사용자의 주문 생성, 취소, 결제 준비 및 승인, QR 픽업 관련 API"
+    },
+    {
+      "name": "Seller",
+      "description": "판매자 계정 관리 API"
+    },
+    {
+      "name": "Seller - Products",
+      "description": "판매자용 상품 등록, 수정, 삭제 및 조회 API"
+    },
+    {
+      "name": "Seller - Stores",
+      "description": "판매자용 매장 등록, 관리 및 리뷰 답글 API"
+    },
+    {
+      "name": "Seller - Pickup",
+      "description": "사장님용 주문 관리 및 QR 픽업 처리 API"
+    },
+    {
+      "name": "Test",
+      "description": "개발 테스트용 API"
     }
   ],
   "paths": {
@@ -96,48 +92,85 @@
             }
           },
           "400": {
-            "description": "입력 형식이 잘못되었습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
+            "description": "입력 형식이 잘못되었습니다."
           },
           "409": {
-            "description": "이미 가입된 이력이 있습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
+            "description": "이미 가입된 이력이 있습니다."
           }
         }
       }
     },
-    "/api/v2/sellers": {
-      "post": {
+    "/api/v2/users/me": {
+      "patch": {
         "tags": [
-          "Seller"
+          "User"
         ],
-        "summary": "판매자 회원가입",
-        "operationId": "signUp_1",
+        "summary": "유저 개인정보 수정",
+        "operationId": "updateProfile",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SellerSignUpRequest"
+                "$ref": "#/components/schemas/UserUpdateRequest"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "201": {
-            "description": "회원가입 완료",
+          "200": {
+            "description": "수정 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "수정할 필드 형식이 잘못되었습니다."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "유저 회원 탈퇴",
+        "description": "토큰 기반 본인 계정 탈퇴",
+        "operationId": "withdraw",
+        "responses": {
+          "200": {
+            "description": "탈퇴가 완료되었습니다."
+          },
+          "401": {
+            "description": "인증 정보가 유효하지 않습니다."
+          }
+        }
+      }
+    },
+    "/api/v2/auth/tokens": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그인",
+        "description": "소셜 또는 로컬 로그인",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "로그인 성공",
             "content": {
               "*/*": {
                 "schema": {
@@ -147,392 +180,39 @@
             }
           },
           "400": {
-            "description": "입력 형식이 잘못되었습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
+            "description": "잘못된 입력 형식입니다."
           },
-          "409": {
-            "description": "이미 가입된 이력이 있습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/sellers/stores": {
-      "get": {
-        "tags": [
-          "Seller - Stores"
-        ],
-        "summary": "내 매장 목록 조회",
-        "operationId": "getMyStores",
-        "responses": {
-          "200": {
-            "description": "매장 정보 조회 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Seller - Stores"
-        ],
-        "summary": "새로운 매장 등록",
-        "operationId": "createStore",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SellerStoreCreateRequest"
-              }
-            }
+          "401": {
+            "description": "비밀번호가 일치하지 않습니다."
           },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "매장 등록 성공"
-          }
-        }
-      }
-    },
-    "/api/v2/sellers/stores/{storeId}/reviews/{reviewId}/reply": {
-      "post": {
-        "tags": [
-          "Seller - Stores"
-        ],
-        "summary": "리뷰 답글 등록",
-        "operationId": "replyToReview",
-        "parameters": [
-          {
-            "name": "storeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "reviewId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SellerReviewReplyRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "답글 작성 성공"
-          }
-        }
-      }
-    },
-    "/api/v2/sellers/products": {
-      "get": {
-        "tags": [
-          "Seller - Products"
-        ],
-        "summary": "판매자 상품 목록 조회",
-        "description": "내 매장 상품 목록 (검색/필터링 가능)",
-        "operationId": "getSellerProducts",
-        "responses": {
-          "200": {
-            "description": "상품 목록 조회 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Seller - Products"
-        ],
-        "summary": "상품 등록",
-        "operationId": "createProduct",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SellerProductCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "400": {
-            "description": "잘못된 등록 형식입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "상품 등록 성공"
-          }
-        }
-      }
-    },
-    "/api/v2/reviews": {
-      "get": {
-        "tags": [
-          "User - Reviews"
-        ],
-        "summary": "리뷰 목록 조회",
-        "description": "특정 마트 리뷰 또는 내가 쓴 리뷰 조회",
-        "operationId": "getReviews",
-        "parameters": [
-          {
-            "name": "storeId",
-            "in": "query",
-            "description": "마트 ID (특정 마트 리뷰 조회 시)",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "myReviews",
-            "in": "query",
-            "description": "내 리뷰만 보기 여부",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "조회 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "User - Reviews"
-        ],
-        "summary": "리뷰 쓰기",
-        "description": "주문 내역 기반 리뷰 작성",
-        "operationId": "createReview",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReviewCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "리뷰 작성 성공"
-          },
-          "409": {
-            "description": "이미 작성된 리뷰가 존재합니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/payments/confirm": {
-      "post": {
-        "tags": [
-          "Payment - 승인"
-        ],
-        "summary": "상품 결제 승인",
-        "operationId": "confirmPayment",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PaymentConfirmRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "결제 승인 완료"
-          }
-        }
-      }
-    },
-    "/api/v2/orders": {
-      "get": {
-        "tags": [
-          "User - Orders & Payment"
-        ],
-        "summary": "내 주문 목록 전체 조회",
-        "operationId": "getMyOrders",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OrderSummaryResponse"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "User - Orders & Payment"
-        ],
-        "summary": "상품 주문하기 (결제 대기 생성)",
-        "description": "장바구니 또는 직접 구매",
-        "operationId": "createOrder",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OrderCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
           "404": {
-            "description": "주문할 상품이 존재하지 않음",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderCreateResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 주문 형식",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderCreateResponse"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "주문 생성 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderCreateResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "상품 품절 또는 타임딜 이벤트 종료",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderCreateResponse"
-                }
-              }
-            }
+            "description": "존재하지 않는 계정입니다."
           }
         }
-      }
-    },
-    "/api/v2/orders/{orderId}/payment": {
-      "post": {
+      },
+      "delete": {
         "tags": [
-          "User - Orders & Payment"
+          "Auth"
         ],
-        "summary": "결제 준비 (토스 위젯)",
-        "operationId": "preparePayment",
+        "summary": "로그아웃",
+        "description": "Refresh Token 무효화",
+        "operationId": "logout",
         "parameters": [
           {
-            "name": "orderId",
-            "in": "path",
+            "name": "Authorization",
+            "in": "header",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaymentReadyResponse"
-                }
-              }
-            }
+            "description": "로그아웃 성공"
+          },
+          "401": {
+            "description": "유효하지 않은 토큰입니다."
           }
         }
       }
@@ -584,25 +264,11 @@
               }
             }
           },
-          "409": {
-            "description": "남은 재고가 부족합니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "400": {
-            "description": "잘못된 요청입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "잘못된 요청입니다."
+          },
+          "409": {
+            "description": "남은 재고가 부족합니다."
           }
         }
       },
@@ -640,413 +306,6 @@
         }
       }
     },
-    "/api/v2/auth/tokens": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "로그인",
-        "description": "소셜 또는 로컬 로그인",
-        "operationId": "login",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "401": {
-            "description": "비밀번호가 일치하지 않습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "로그인 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "존재하지 않는 계정입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 입력 형식입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "로그아웃",
-        "description": "Refresh Token 무효화",
-        "operationId": "logout",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "401": {
-            "description": "유효하지 않은 토큰입니다."
-          },
-          "200": {
-            "description": "로그아웃 성공"
-          }
-        }
-      }
-    },
-    "/api/v2/users/me": {
-      "delete": {
-        "tags": [
-          "User"
-        ],
-        "summary": "유저 회원 탈퇴",
-        "description": "토큰 기반 본인 계정 탈퇴",
-        "operationId": "withdraw",
-        "responses": {
-          "200": {
-            "description": "탈퇴가 완료되었습니다."
-          },
-          "401": {
-            "description": "인증 정보가 유효하지 않습니다."
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "User"
-        ],
-        "summary": "유저 개인정보 수정",
-        "operationId": "updateProfile",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "수정 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "수정할 필드 형식이 잘못되었습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/sellers/stores/{storeId}": {
-      "patch": {
-        "tags": [
-          "Seller - Stores"
-        ],
-        "summary": "매장 정보 수정 및 폐업 처리",
-        "operationId": "updateOrDeleteStore",
-        "parameters": [
-          {
-            "name": "storeId",
-            "in": "path",
-            "description": "매장 ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SellerStoreUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "404": {
-            "description": "내 매장이 아닙니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "매장 정보 변경 성공"
-          }
-        }
-      }
-    },
-    "/api/v2/sellers/products/{productId}": {
-      "patch": {
-        "tags": [
-          "Seller - Products"
-        ],
-        "summary": "상품 정보 수정 및 삭제 (논리적 삭제)",
-        "operationId": "updateOrDeleteProduct",
-        "parameters": [
-          {
-            "name": "productId",
-            "in": "path",
-            "description": "상품 ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SellerProductUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "404": {
-            "description": "내 매장의 상품이 아닙니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 수정 형식입니다."
-          },
-          "200": {
-            "description": "상품 수정/삭제 처리 완료"
-          }
-        }
-      }
-    },
-    "/api/v2/sellers/orders/{orderId}/pickup": {
-      "patch": {
-        "tags": [
-          "Seller - Pickup"
-        ],
-        "summary": "QR 스캔 후 픽업 완료 처리",
-        "description": "사장님 앱에서 고객 QR 스캔 후 상태 업데이트",
-        "operationId": "completePickup",
-        "parameters": [
-          {
-            "name": "orderId",
-            "in": "path",
-            "description": "주문 번호(ID)",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/QrScanRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "400": {
-            "description": "QR 코드 형식이 잘못되었습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "이미 픽업이 완료되었거나 취소된 주문입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "존재하지 않는 주문입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "정상적으로 픽업 처리되었습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/reviews/{reviewId}": {
-      "patch": {
-        "tags": [
-          "User - Reviews"
-        ],
-        "summary": "리뷰 수정",
-        "description": "별점 또는 내용 수정 (부분 수정 지원)",
-        "operationId": "updateReview",
-        "parameters": [
-          {
-            "name": "reviewId",
-            "in": "path",
-            "description": "리뷰 ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReviewUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "400": {
-            "description": "잘못된 요청입니다."
-          },
-          "404": {
-            "description": "본인의 리뷰가 아니거나 존재하지 않습니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "리뷰 수정 성공"
-          }
-        }
-      }
-    },
-    "/api/v2/orders/{orderId}/cancel": {
-      "patch": {
-        "tags": [
-          "User - Orders & Payment"
-        ],
-        "summary": "주문 취소 및 환불",
-        "operationId": "cancelOrder",
-        "parameters": [
-          {
-            "name": "orderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CancelRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "취소 성공"
-          },
-          "404": {
-            "description": "취소할 주문이 없습니다."
-          },
-          "400": {
-            "description": "잘못된 요청"
-          },
-          "409": {
-            "description": "이미 취소되었거나 픽업 완료되어 취소 불가"
-          }
-        }
-      }
-    },
     "/api/v2/carts/{id}": {
       "patch": {
         "tags": [
@@ -1076,9 +335,6 @@
           "required": true
         },
         "responses": {
-          "409": {
-            "description": "남은 재고가 부족합니다."
-          },
           "200": {
             "description": "수량 변경 성공"
           },
@@ -1087,6 +343,9 @@
           },
           "404": {
             "description": "장바구니에 존재하지 않는 아이템입니다."
+          },
+          "409": {
+            "description": "남은 재고가 부족합니다."
           }
         }
       }
@@ -1164,16 +423,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "존재하지 않거나 폐업한 마트입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "마트 상세 조회 성공",
             "content": {
@@ -1183,6 +432,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "존재하지 않거나 폐업한 마트입니다."
           }
         }
       }
@@ -1259,16 +511,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "존재하지 않는 가게 또는 카테고리입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "검색 완료",
             "content": {
@@ -1280,14 +522,10 @@
             }
           },
           "400": {
-            "description": "잘못된 검색 형식입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "잘못된 검색 형식입니다."
+          },
+          "404": {
+            "description": "존재하지 않는 가게 또는 카테고리입니다."
           }
         }
       }
@@ -1312,16 +550,6 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "잘못된 요청 형식입니다.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "상세 조회 완료",
             "content": {
@@ -1332,15 +560,294 @@
               }
             }
           },
+          "400": {
+            "description": "잘못된 요청 형식입니다."
+          },
           "404": {
-            "description": "해당 상품을 찾을 수 없습니다. (품절/삭제 등)",
+            "description": "해당 상품을 찾을 수 없습니다. (품절/삭제 등)"
+          }
+        }
+      }
+    },
+    "/api/v2/reviews": {
+      "get": {
+        "tags": [
+          "User - Reviews"
+        ],
+        "summary": "리뷰 목록 조회",
+        "description": "특정 마트 리뷰 또는 내가 쓴 리뷰 조회",
+        "operationId": "getReviews",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "query",
+            "description": "마트 ID (특정 마트 리뷰 조회 시)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "myReviews",
+            "in": "query",
+            "description": "내 리뷰만 보기 여부",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/ReviewResponse"
                 }
               }
             }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User - Reviews"
+        ],
+        "summary": "리뷰 쓰기",
+        "description": "주문 내역 기반 리뷰 작성",
+        "operationId": "createReview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "리뷰 작성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청입니다."
+          },
+          "409": {
+            "description": "이미 작성된 리뷰가 존재합니다."
+          }
+        }
+      }
+    },
+    "/api/v2/reviews/{reviewId}": {
+      "patch": {
+        "tags": [
+          "User - Reviews"
+        ],
+        "summary": "리뷰 수정",
+        "description": "별점 또는 내용 수정 (부분 수정 지원)",
+        "operationId": "updateReview",
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "description": "리뷰 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "리뷰 수정 성공"
+          },
+          "400": {
+            "description": "잘못된 요청입니다."
+          },
+          "404": {
+            "description": "본인의 리뷰가 아니거나 존재하지 않습니다."
+          }
+        }
+      }
+    },
+    "/api/v2/orders": {
+      "get": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "내 주문 목록 전체 조회",
+        "operationId": "getMyOrders",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "상품 주문하기 (결제 대기 생성)",
+        "description": "장바구니 또는 직접 구매",
+        "operationId": "createOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "주문 생성 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 주문 형식"
+          },
+          "404": {
+            "description": "주문할 상품이 존재하지 않음"
+          },
+          "409": {
+            "description": "상품 품절 또는 타임딜 이벤트 종료"
+          }
+        }
+      }
+    },
+    "/api/v2/orders/{orderId}/payment": {
+      "post": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "결제 준비 (토스 위젯 데이터 요청)",
+        "operationId": "preparePayment",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentReadyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/payments/confirm": {
+      "post": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "상품 최종 결제 승인",
+        "description": "토스페이먼츠 연동을 통한 금액 대조 및 최종 승인",
+        "operationId": "confirmPayment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "결제 승인 완료"
+          },
+          "400": {
+            "description": "결제 금액 불일치 등 결제 승인 실패"
+          }
+        }
+      }
+    },
+    "/api/v2/orders/{orderId}/cancel": {
+      "patch": {
+        "tags": [
+          "User - Orders & Payment"
+        ],
+        "summary": "주문 취소 및 부분/전액 환불",
+        "description": "결제 전 취소 및 결제 후 토스페이먼츠 환불 동시 지원 (부분 취소 가능)",
+        "operationId": "cancelOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "취소 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "404": {
+            "description": "취소할 주문이 없습니다."
+          },
+          "409": {
+            "description": "이미 취소되었거나 픽업 완료되어 취소 불가"
           }
         }
       }
@@ -1364,16 +871,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "존재하지 않는 주문 (IDOR 방어)",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
           "200": {
             "description": "상세내역 조회 성공",
             "content": {
@@ -1383,6 +880,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "존재하지 않는 주문 (IDOR 방어)"
           }
         }
       }
@@ -1406,16 +906,6 @@
           }
         ],
         "responses": {
-          "409": {
-            "description": "READY_FOR_PICKUP 상태가 아님",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/QrTokenResponse"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -1427,14 +917,333 @@
             }
           },
           "404": {
-            "description": "존재하지 않는 주문 또는 내 주문 아님",
+            "description": "존재하지 않는 주문 또는 내 주문 아님"
+          },
+          "409": {
+            "description": "READY_FOR_PICKUP 상태가 아님"
+          }
+        }
+      }
+    },
+    "/api/v2/sellers": {
+      "post": {
+        "tags": [
+          "Seller"
+        ],
+        "summary": "판매자 회원가입",
+        "operationId": "signUp_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerSignUpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "회원가입 완료",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/QrTokenResponse"
+                  "$ref": "#/components/schemas/LoginResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "입력 형식이 잘못되었습니다."
+          },
+          "409": {
+            "description": "이미 가입된 이력이 있습니다."
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/me": {
+      "delete": {
+        "tags": [
+          "Seller"
+        ],
+        "summary": "판매자 회원 탈퇴",
+        "description": "매장 폐업 등 관련 정리 작업 포함",
+        "operationId": "withdraw_1",
+        "responses": {
+          "200": {
+            "description": "탈퇴가 완료되었습니다."
+          },
+          "401": {
+            "description": "인증 정보가 유효하지 않습니다."
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/products": {
+      "get": {
+        "tags": [
+          "Seller - Products"
+        ],
+        "summary": "판매자 상품 목록 조회",
+        "description": "내 매장 상품 목록 (검색/필터링 가능)",
+        "operationId": "getSellerProducts",
+        "responses": {
+          "200": {
+            "description": "상품 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Seller - Products"
+        ],
+        "summary": "상품 등록",
+        "operationId": "createProduct",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerProductCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "상품 등록 성공"
+          },
+          "400": {
+            "description": "잘못된 등록 형식입니다."
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/products/{productId}": {
+      "patch": {
+        "tags": [
+          "Seller - Products"
+        ],
+        "summary": "상품 정보 수정 및 삭제 (논리적 삭제)",
+        "operationId": "updateOrDeleteProduct",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "상품 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerProductUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "상품 수정/삭제 처리 완료"
+          },
+          "400": {
+            "description": "잘못된 수정 형식입니다."
+          },
+          "404": {
+            "description": "내 매장의 상품이 아닙니다."
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/stores": {
+      "get": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "내 매장 목록 조회",
+        "operationId": "getMyStores",
+        "responses": {
+          "200": {
+            "description": "매장 정보 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "새로운 매장 등록",
+        "operationId": "createStore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerStoreCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "매장 등록 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/stores/{storeId}": {
+      "patch": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "매장 정보 수정 및 폐업 처리",
+        "operationId": "updateOrDeleteStore",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "description": "매장 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerStoreUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "매장 정보 변경 성공"
+          },
+          "404": {
+            "description": "내 매장이 아닙니다."
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/stores/{storeId}/reviews/{reviewId}/reply": {
+      "post": {
+        "tags": [
+          "Seller - Stores"
+        ],
+        "summary": "리뷰 답글 등록",
+        "operationId": "replyToReview",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerReviewReplyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "답글 작성 성공"
+          }
+        }
+      }
+    },
+    "/api/v2/sellers/orders/{orderId}/pickup": {
+      "patch": {
+        "tags": [
+          "Seller - Pickup"
+        ],
+        "summary": "QR 스캔 후 픽업 완료 처리",
+        "description": "사장님 앱에서 고객 QR 스캔 후 상태 업데이트",
+        "operationId": "completePickup",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "주문 번호(ID)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QrScanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "정상적으로 픽업 처리되었습니다.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "QR 코드 형식이 잘못되었습니다."
+          },
+          "404": {
+            "description": "존재하지 않는 주문입니다."
+          },
+          "409": {
+            "description": "이미 픽업이 완료되었거나 취소된 주문입니다."
           }
         }
       }
@@ -1467,24 +1276,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/v2/sellers/me": {
-      "delete": {
-        "tags": [
-          "Seller"
-        ],
-        "summary": "판매자 회원 탈퇴",
-        "description": "매장 폐업 등 관련 정리 작업 포함",
-        "operationId": "withdraw_1",
-        "responses": {
-          "200": {
-            "description": "탈퇴가 완료되었습니다."
-          },
-          "401": {
-            "description": "인증 정보가 유효하지 않습니다."
           }
         }
       }
@@ -1728,7 +1519,6 @@
             "description": "장바구니 아이템 ID 목록 (장바구니 주문 시)",
             "items": {
               "type": "integer",
-              "description": "장바구니 아이템 ID 목록 (장바구니 주문 시)",
               "format": "int64"
             }
           },
@@ -1959,6 +1749,27 @@
         },
         "description": "리뷰 수정 요청 (별점/내용 모두)"
       },
+      "CancelItem": {
+        "type": "object",
+        "required": [
+          "orderItemId",
+          "cancelQuantity"
+        ],
+        "properties": {
+          "orderItemId": {
+            "type": "integer",
+            "description": "취소할 주문 상세 내역(OrderItem)의 ID",
+            "format": "int64",
+            "example": 25
+          },
+          "cancelQuantity": {
+            "type": "integer",
+            "description": "취소할 수량",
+            "format": "int32",
+            "example": 1
+          }
+        }
+      },
       "CancelRequest": {
         "type": "object",
         "properties": {
@@ -1966,6 +1777,13 @@
             "type": "string",
             "description": "취소 사유",
             "example": "단순 변심"
+          },
+          "cancelItems": {
+            "type": "array",
+            "description": "부분 취소할 상품 목록 (전액 취소 시 생략 또는 빈 배열 가능)",
+            "items": {
+              "$ref": "#/components/schemas/CancelItem"
+            }
           }
         }
       },
