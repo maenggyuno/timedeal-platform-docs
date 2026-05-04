@@ -380,7 +380,7 @@ sequenceDiagram
     end
 ```
 <br>
-🌐 OAuth 2.0 소셜 로그인 및 토큰 생명주기
+🌐 로컬 인증(이메일/비밀번호) 전체 생명주기 및 토큰 관리 흐름
 
 ```mermaid
 ---
