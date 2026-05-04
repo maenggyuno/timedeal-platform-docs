@@ -379,6 +379,123 @@ sequenceDiagram
         FE->>User: 메인 화면으로 리다이렉트 (탈퇴 완료)
     end
 ```
+<br>
+🌐 OAuth 2.0 소셜 로그인 및 토큰 생명주기
+
+```mermaid
+---
+title: 로컬 인증(이메일/비밀번호) 전체 생명주기 및 토큰 관리 흐름
+---
+sequenceDiagram
+    autonumber
+    actor User as 사용자
+    participant FE as 프론트엔드(브라우저)
+    participant BE as 백엔드(Spring Security)
+    participant DB as Database(MySQL)
+    participant Redis as Redis(In-Memory)
+
+    %% ==========================================
+    %% [대분류 1] 로컬 회원가입 (BCrypt 암호화 및 자동 로그인)
+    %% ==========================================
+    rect rgb(240, 248, 255)
+        note right of User: 🔵 [대분류 1] 로컬 회원가입 및 자동 로그인
+        User->>FE: 가입 정보(이메일, 비밀번호, 이름 등) 입력 후 가입 클릭
+        FE->>BE: [POST] /api/v2/users <br> { "email": "...", "password": "...", ... }
+        
+        BE->>DB: 이메일 중복 가입 여부 확인
+        alt 이미 존재하는 이메일
+            BE-->>FE: 409 Conflict (중복된 이메일)
+            FE->>User: "이미 가입된 이메일입니다." 표시
+        else 사용 가능한 이메일
+            note over BE, DB: 🔒 보안 핵심: 평문 비밀번호를 단방향 해시로 암호화
+            BE->>BE: BCryptPasswordEncoder.encode(password)
+            BE->>DB: 유저 정보 및 해시된 비밀번호 INSERT
+            
+            note over BE, Redis: 자동 로그인 (소셜과 동일한 토큰 발급 로직)
+            BE->>BE: 🔑 동네콕 전용 Access Token & Refresh Token 생성
+            BE->>Redis: Refresh Token 저장 (TTL 설정)
+            BE-->>FE: 201 Created <br> (Body: AccessToken / Cookie: RefreshToken)
+            FE->>User: 메인 화면으로 리다이렉트 (가입 및 로그인 완료)
+        end
+    end
+
+    %% ==========================================
+    %% [대분류 2] 로컬 로그인
+    %% ==========================================
+    rect rgb(255, 240, 245)
+        note right of User: 🔴 [대분류 2] 로컬 로그인 (자격 증명 검증)
+        User->>FE: 이메일, 비밀번호 입력 후 '로그인' 버튼 클릭
+        FE->>BE: [POST] /api/v2/auth/tokens <br> { "provider": "LOCAL", "email": "...", "password": "..." }
+        
+        BE->>DB: 전달받은 이메일로 유저 정보 및 해시 비밀번호 조회
+        
+        alt 유저가 없거나 비밀번호 불일치 (BCrypt.matches 검증)
+            BE-->>FE: 401 Unauthorized (또는 404)
+            FE->>User: "계정 정보가 일치하지 않습니다." 표시
+        else 비밀번호 일치 (검증 통과)
+            BE->>BE: 🔑 새로운 Access Token & Refresh Token 생성
+            BE->>Redis: Refresh Token 저장 (기존 토큰 있으면 덮어쓰기)
+            BE-->>FE: 200 OK <br> (Body: AccessToken / Cookie: RefreshToken)
+            FE->>User: 메인 화면으로 리다이렉트 (로그인 성공)
+        end
+    end
+
+    %% ==========================================
+    %% [대분류 3] 토큰 재발급 (소셜/로컬 100% 공통 로직)
+    %% ==========================================
+    rect rgb(255, 250, 205)
+         note right of User: 🟡 [대분류 3] 토큰 자동 재발급 (Access Token 수명 만료 시)
+         User->>BE: [GET] /api/v2/orders (Header: 만료된 AccessToken)
+         BE-->>User: 401 Unauthorized (토큰 만료 에러코드 반환)
+
+         note over User, BE: 💡 프론트엔드 로직: 401 에러 감지 후 몰래 재발급 API 호출
+         User->>BE: [POST] /api/v2/auth/reissue <br> 🍪 (Cookie: RefreshToken 자동 전송)
+         BE->>Redis: Redis에서 RefreshToken 존재 및 일치 여부 확인
+         BE->>BE: 새로운 Access Token 및 Refresh Token 생성
+         BE->>Redis: 기존 RefreshToken 교체 (RTR 기법 적용)
+         BE-->>User: 200 OK <br> (Body: 새 AccessToken / Cookie: 새 RefreshToken)
+
+         User->>BE: 발급받은 새 토큰으로 실패했던 API 재요청
+         BE-->>User: 200 OK (정상 데이터 반환)
+    end
+
+    %% ==========================================
+    %% [대분류 4] 로그아웃 (소셜/로컬 100% 공통 로직)
+    %% ==========================================
+    rect rgb(245, 245, 245)
+         note right of User: ⚪ [대분류 4] 로그아웃 (토큰 블랙리스트 처리)
+         User->>User: '로그아웃' 버튼 클릭
+         
+         User->>BE: [DELETE] /api/v2/auth/tokens <br> (Header: AccessToken) <br> 🍪 (Cookie: RefreshToken)
+
+         BE->>Redis: 1. 해당 유저의 Refresh Token 영구 삭제
+         BE->>BE: 2. 현재 Access Token의 남은 만료 시간 계산
+         BE->>Redis: 3. 남은 시간만큼 Access Token을 '블랙리스트'에 등록
+
+         BE-->>User: 200 OK <br> (Cookie: Refresh Token 만료 처리)
+         User->>User: JS 메모리에 들고 있던 Access Token 폐기 후 홈 이동
+    end
+  
+    %% ==========================================
+    %% [대분류 5] 회원 탈퇴 (소셜 연동 해제 과정 없음)
+    %% ==========================================
+    rect rgb(240, 255, 240)
+        note right of User: 🟢 [대분류 5] 로컬 회원 탈퇴
+        User->>FE: '회원 탈퇴' 버튼 클릭 (경고 팝업 확인)
+        FE->>BE: [DELETE] /api/v2/users/me <br> (Header: AccessToken) <br> 🍪 (Cookie: RefreshToken)
+        
+        note over BE, DB: 💡 소셜 회원은 여기서 OAuth Unlink 과정이 추가되지만, 로컬은 생략됨
+        BE->>DB: 해당 유저 데이터 삭제 (또는 Soft Delete `deleted_at` 업데이트)
+        
+        note right of User: 탈퇴 시 로그아웃과 동일한 토큰 파기 처리 진행
+        BE->>Redis: Refresh Token 영구 삭제
+        BE->>Redis: Access Token을 '블랙리스트'에 등록
+        BE-->>FE: 200 OK <br> (Cookie: RefreshToken 삭제 처리)
+        
+        FE->>FE: JS 메모리에 들고 있던 Access Token 폐기
+        FE->>User: 메인 화면으로 리다이렉트 (탈퇴 완료)
+    end
+```
 
 
 <br>
