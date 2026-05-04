@@ -258,89 +258,126 @@ end
 
 ```mermaid
 ---
-title: OAuth 2.0 소셜 로그인 및 토큰 생명주기
+title: OAuth 2.0 소셜 로그인 및 토큰 생명주기 전체 흐름
 ---
 sequenceDiagram
-autonumber
-actor User as 사용자
-participant FE as 프론트엔드
-participant BE as 백엔드(Spring)
-participant DB as Database
-participant OAuth as 소셜 서버(네이버/구글)
+    autonumber
+    actor User as 사용자
+    participant FE as 프론트엔드(브라우저)
+    participant BE as 백엔드(Spring)
+    participant DB as Database/Redis
+    participant OAuth as 소셜 서버(네이버/구글)
 
-rect rgb(240, 248, 255)
-    note right of User: 1. 소셜 로그인 인증 요청 (프론트엔드의 역할)
-    User->>FE: '네이버로 로그인' 버튼 클릭
-    FE->>OAuth: 네이버 로그인 페이지로 리다이렉트 (Client ID 포함)
-    OAuth-->>User: 로그인 팝업창 표시
-    User->>OAuth: ID/PW 입력 및 정보 제공 동의
-    OAuth-->>FE: 🔑 Authorization Code 발급 (리다이렉트 URI로 전달)
-end
-
-rect rgb(255, 240, 245)
-    note right of User: 2. 토큰 교환 및 유저 검증 (백엔드의 역할 - 보안 핵심)
-    note over FE, BE: 프론트는 발급받은 Code만 백엔드로 넘김 (socialId 직접 넘기면 안 됨!)
-    FE->>BE: [POST] /api/v2/auth/login/naver <br> { "code": "abc1234..." }
-
-    note over BE, OAuth: 🔒 백엔드 ➔ 소셜 서버 직접 통신 (Secret Key 사용)
-    BE->>OAuth: [POST] Code를 주면서 네이버 Access Token 요청
-    OAuth-->>BE: 네이버 Access Token 발급
-
-    BE->>OAuth: [GET] 네이버 Access Token으로 유저 프로필(이메일, 이름 등) 요청
-    OAuth-->>BE: 유저 프로필 정보 (이메일, 고유 식별자 등) 반환
-end
-
-rect rgb(240, 255, 240)
-    note right of User: 3. 동네콕 전용 토큰 발급 (자동 회원가입/로그인)
-    BE->>DB: 전달받은 이메일/식별자로 기존 가입 유저인지 조회
-
-    alt 신규 유저인 경우 (자동 회원가입)
-        BE->>DB: 유저 정보 새로 저장 (Role: USER)
+    %% ==========================================
+    %% [대분류 1] 소셜 로그인 및 자동 회원가입
+    %% ==========================================
+    rect rgb(240, 248, 255)
+        note right of User: 🟢 [대분류 1] 소셜 로그인 및 자동 회원가입
+        note right of User: 1-1. 소셜 인증 요청 (프론트 ➔ 네이버 다이렉트 호출)
+        User->>FE: '네이버로 로그인' 버튼 클릭
+        note over FE, OAuth: GET nid.naver.com/oauth2.0/authorize?client_id=...&response_type=code
+        FE->>OAuth: 네이버 로그인 페이지로 브라우저 이동
+        OAuth-->>User: 초록색 네이버 로그인 팝업창 표시 (최초 1회만 동의 창 포함)
+        User->>OAuth: ID/PW 입력 및 정보 제공 동의
+        OAuth-->>FE: 🔑 인증 코드(Code)를 쿼리 파라미터로 달아 프론트로 리다이렉트
     end
 
-    BE->>BE: 🔑 동네콕 전용 Access Token & Refresh Token 생성
-    BE->>DB: Refresh Token 저장 (보안을 위해 DB나 Redis에 저장)
-    BE-->>FE: 200 OK <br> (Body: Access Token / Cookie: Refresh Token)
-    FE->>User: 메인 화면으로 이동 (로그인 성공)
-end
+    rect rgb(255, 240, 245)
+        note right of User: 1-2. 토큰 교환 및 소셜 프로필 조회 (백엔드의 뒷단 통신)
+        note over FE, BE: 프론트는 네이버에서 받아온 Code를 드디어 우리 백엔드로 전달!
+        FE->>BE: [POST] /api/v2/auth/tokens <br> { "provider": "NAVER", "code": "abc1234..." }
 
-rect rgb(255, 250, 205)
-     note right of User: 시나리오 A: 토큰 재발급 (Access Token 자동 갱신)
-     User->>BE: [GET] /api/v2/orders <br> (Header: 만료된 AccessToken)
-     BE-->>User: 401 Unauthorized (토큰 만료 에러코드 반환)
-        
-     note over User, BE: 💡 프론트엔드 로직: 401 에러를 낚아채서(Interceptor) 몰래 재발급 요청
-     User->>BE: [POST] /api/v2/auth/reissue <br> (Cookie: RefreshToken)
-     BE->>DB: Redis에서 RefreshToken 존재 및 일치 여부 확인
-        
-     alt 유효하지 않거나 만료된 Refresh Token
-         BE-->>User: 401 Unauthorized (재로그인 필요)
-         User->>User: 로그인 페이지로 강제 이동
-     else 유효한 Refresh Token
-         BE->>BE: 새로운 Access Token (및 새 Refresh Token) 생성
-         BE->>DB: 기존 RefreshToken 덮어쓰기 (RTR 기법 적용 권장)
-         BE-->>User: 200 OK <br> (Body: 새 AccessToken 반환)
-            
-         note over User, BE: 💡 프론트엔드 로직: 발급받은 새 토큰으로 아까 실패했던 요청 다시 쏘기
-         User->>BE: [GET] /api/v2/orders <br> (Header: 새로운 AccessToken)
-         BE-->>User: 200 OK (정상 데이터 반환)
-      end
-  end
+        note over BE, OAuth: 🔒 백엔드 ➔ 소셜 서버 직접 통신 (Secret Key 사용)
+        BE->>OAuth: [POST] Code를 주면서 네이버 Access Token 요청
+        OAuth-->>BE: 네이버 Access Token 발급
 
-  rect rgb(240, 248, 255)
-     note right of User: 시나리오 B: 완전한 로그아웃 처리 (블랙리스트)
-     User->>User: '로그아웃' 버튼 클릭
-     User->>BE: [POST] /api/v2/auth/logout <br> (Header: AccessToken)
+        BE->>OAuth: [GET] 네이버 Access Token으로 유저 프로필(이메일, 이름 등) 요청
+        OAuth-->>BE: 유저 프로필 정보 (이메일, 고유 식별자 등) 반환
+    end
+
+    rect rgb(240, 255, 240)
+        note right of User: 1-3. 동네콕 자동 회원가입 및 로그인 처리 (하나의 API 안에서 발생)
+        BE->>DB: 백엔드 내부 로직: 소셜 식별자로 DB 조회
+
+        alt DB에 없는 신규 유저인 경우 (조용히 자동 가입)
+            BE->>DB: 네이버에서 받은 이름/이메일로 User 새로 저장 (Role: USER)
+        end
+
+        note over BE, DB: 기존/신규 유저 공통 로직 (자체 토큰 발급)
+        BE->>BE: 🔑 동네콕 전용 Access Token & Refresh Token 생성
+        BE->>DB: Refresh Token을 Redis에 저장 (RTR 보안 용도)
+
+        note over FE, BE: 프론트는 이게 가입인지 로그인인지 알 필요 없음!
+        BE-->>FE: 200 OK <br> (Body: AccessToken / Cookie: RefreshToken)
+        FE->>User: 메인 화면으로 렌더링 (로그인 성공)
+    end
+
+    %% ==========================================
+    %% [대분류 2] 토큰 재발급
+    %% ==========================================
+    rect rgb(255, 250, 205)
+         note right of User: 🟡 [대분류 2] 토큰 자동 재발급 (Access Token 수명 만료 시)
+         note right of User: 2-1. API 실패 감지 및 몰래 재발급 처리
+         User->>BE: [GET] /api/v2/orders (Header: 만료된 AccessToken)
+         BE-->>User: 401 Unauthorized (토큰 만료 에러코드 반환)
+
+         note over User, BE: 💡 프론트엔드 로직: 401 에러를 낚아채서 재발급 API 호출
+         User->>BE: [POST] /api/v2/auth/reissue <br> (Cookie: RefreshToken 자동 전송)
+         BE->>DB: Redis에서 RefreshToken 일치 여부 확인
+         BE->>BE: 새로운 Access Token 및 Refresh Token 생성
+         BE->>DB: 기존 RefreshToken 덮어쓰기 (RTR 기법)
+         BE-->>User: 200 OK <br> (Body: 새 AccessToken / Cookie: 새 RefreshToken)
+
+         User->>BE: 발급받은 새 토큰으로 아까 실패했던 API 다시 요청
+         BE-->>User: 200 OK
+    end
+
+    %% ==========================================
+    %% [대분류 3] 로그아웃
+    %% ==========================================
+    rect rgb(245, 245, 245)
+         note right of User: ⚪ [대분류 3] 로그아웃
+         note right of User: 3-1. 로그아웃 요청 및 토큰 블랙리스트 처리
+         User->>User: '로그아웃' 버튼 클릭
+         
+         note over User, BE: 브라우저가 Refresh Token 쿠키를 알아서 같이 보냄!
+         User->>BE: [DELETE] /api/v2/auth/tokens <br> (Header: AccessToken) <br> 🍪 (Cookie: RefreshToken)
+
+         BE->>DB: Redis에서 해당 유저의 Refresh Token 영구 삭제
+         BE->>BE: 현재 Access Token의 남은 만료 시간 계산
+         BE->>DB: 남은 시간만큼 해당 Access Token을 Redis '블랙리스트'에 등록
+
+         BE-->>User: 200 OK <br> (Cookie: Refresh Token 삭제 처리)
+         User->>User: JS 메모리에 들고 있던 Access Token 폐기 후 메인 이동
+    end
+  
+    %% ==========================================
+    %% [대분류 4] 회원 탈퇴
+    %% ==========================================
+    rect rgb(255, 235, 238)
+        note right of User: 🔴 [대분류 4] 회원 탈퇴
+        note right of User: 4-1. 회원 탈퇴 요청 및 소셜 연동 해제
+        User->>FE: '회원 탈퇴' 버튼 클릭 (경고 팝업 확인)
+        FE->>BE: [DELETE] /api/v2/users/me <br> (Header: AccessToken) <br> 🍪 (Cookie: RefreshToken)
+        BE->>BE: Access Token 검증 및 유저 식별
         
-     BE->>DB: 1. 해당 유저의 Refresh Token을 Redis에서 영구 삭제
+        BE->>DB: 해당 유저 데이터 삭제 (또는 Soft Delete 처리)
         
-     note over BE, DB: 🛡️ 보안의 핵심: 탈취당한 Access Token 방어
-     BE->>BE: 현재 Access Token의 남은 만료 시간 계산
-     BE->>DB: 2. 남은 시간만큼 해당 Access Token을 Redis '블랙리스트'에 등록
+        opt 소셜 연동 해제 (Unlink)
+            note over BE, OAuth: 현업 Best Practice: 네이버 측에도 "이 유저랑 앱 연동 끊어줘"라고 통보
+            BE->>OAuth: [POST] 네이버/구글 연동 해제 API 호출
+            OAuth-->>BE: 연동 해제 완료 응답
+        end
         
-     BE-->>User: 200 OK (로그아웃 완료 응답)
-     User->>User: 브라우저에 저장된 모든 토큰 삭제 후 로그인 화면 이동
-  end
+        note right of User: 4-2. 토큰 파기 및 프론트엔드 후처리 (로그아웃과 동일)
+        BE->>DB: Redis에서 해당 유저의 Refresh Token 영구 삭제
+        BE->>BE: 현재 Access Token의 남은 만료 시간 계산
+        BE->>DB: Access Token을 Redis '블랙리스트'에 등록 (탈취 방어)
+        BE-->>FE: 200 OK <br> (Cookie: RefreshToken 삭제 처리)
+        
+        FE->>FE: JS 메모리에 들고 있던 Access Token 폐기
+        FE->>User: 메인 화면으로 리다이렉트 (탈퇴 완료)
+    end
 ```
 
 
