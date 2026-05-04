@@ -83,6 +83,15 @@
         "responses": {
           "201": {
             "description": "회원가입 완료",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Refresh Token (HttpOnly, Secure, SameSite 적용)",
+                "schema": {
+                  "type": "string",
+                  "example": "refreshToken=eyJhbGci...; Path=/; HttpOnly; Secure; SameSite=Strict"
+                }
+              }
+            },
             "content": {
               "*/*": {
                 "schema": {
@@ -170,6 +179,15 @@
         "responses": {
           "201": {
             "description": "회원가입 완료",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Refresh Token (HttpOnly, Secure, SameSite 적용)",
+                "schema": {
+                  "type": "string",
+                  "example": "refreshToken=eyJhbGci...; Path=/; HttpOnly; Secure; SameSite=Strict"
+                }
+              }
+            },
             "content": {
               "*/*": {
                 "schema": {
@@ -211,7 +229,7 @@
           "Auth"
         ],
         "summary": "로그인",
-        "description": "소셜 또는 로컬 로그인",
+        "description": "소셜 또는 로컬 로그인 (소셜 로그인의 경우 code 전달)",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -226,6 +244,15 @@
         "responses": {
           "200": {
             "description": "로그인 성공",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Refresh Token (HttpOnly, Secure, SameSite 적용)",
+                "schema": {
+                  "type": "string",
+                  "example": "refreshToken=eyJhbGci...; Path=/; HttpOnly; Secure; SameSite=Strict"
+                }
+              }
+            },
             "content": {
               "*/*": {
                 "schema": {
@@ -241,7 +268,7 @@
             "description": "비밀번호가 일치하지 않습니다."
           },
           "404": {
-            "description": "존재하지 않는 계정입니다."
+            "description": "존재하지 않는 계정입니다. (소셜 로그인인 경우 회원가입 필요 - 발급된 registerToken 반환 로직 추가 가능)"
           }
         }
       },
@@ -250,7 +277,7 @@
           "Auth"
         ],
         "summary": "로그아웃",
-        "description": "Refresh Token 무효화",
+        "description": "Refresh Token 무효화 및 쿠키 삭제",
         "operationId": "logout",
         "parameters": [
           {
@@ -264,10 +291,53 @@
         ],
         "responses": {
           "200": {
-            "description": "로그아웃 성공"
+            "description": "로그아웃 성공",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Refresh Token 쿠키 만료(삭제) 처리",
+                "schema": {
+                  "type": "string",
+                  "example": "refreshToken=; Path=/; Max-Age=0; HttpOnly; Secure"
+                }
+              }
+            }
           },
           "401": {
             "description": "유효하지 않은 토큰입니다."
+          }
+        }
+      }
+    },
+    "/api/v2/auth/reissue": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "토큰 재발급",
+        "description": "쿠키에 저장된 Refresh Token을 검증하여 새로운 Access Token 및 Refresh Token을 발급합니다. (RTR 적용)",
+        "operationId": "reissueToken",
+        "responses": {
+          "200": {
+            "description": "재발급 성공",
+            "headers": {
+              "Set-Cookie": {
+                "description": "새로운 Refresh Token (RTR 적용 시 교체)",
+                "schema": {
+                  "type": "string",
+                  "example": "refreshToken=eyJhbGci...; Path=/; HttpOnly; Secure; SameSite=Strict"
+                }
+              }
+            },
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Refresh Token이 유효하지 않거나 만료되었습니다. (재로그인 필요)"
           }
         }
       }
@@ -935,16 +1005,6 @@
               "type": "integer",
               "format": "int64"
             }
-          },
-          {
-            "name": "myReviews",
-            "in": "query",
-            "description": "내 리뷰만 보기 여부",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
           }
         ],
         "responses": {
@@ -1289,7 +1349,7 @@
           "email",
           "name",
           "phoneNumber",
-          "socialLoginId"
+          "registerToken"
         ],
         "type": "object",
         "properties": {
@@ -1324,10 +1384,10 @@
             "description": "이메일",
             "example": "gyuno@example.com"
           },
-          "socialLoginId": {
+          "registerToken": {
             "type": "string",
-            "description": "소셜 로그인 고유 ID",
-            "example": "kakao_98765"
+            "description": "소셜 로그인 실패 시 발급받은 임시 가입 토큰 (Raw socialId 전달 방지용)",
+            "example": "eyJhbGciOiJIUzI1NiIs..."
           }
         },
         "description": "구매자(유저) 회원가입 요청 DTO"
@@ -1348,7 +1408,7 @@
           "businessNumber",
           "email",
           "name",
-          "socialLoginId",
+          "registerToken",
           "storeName"
         ],
         "type": "object",
@@ -1373,10 +1433,10 @@
             "description": "연락용 이메일",
             "example": "seller@example.com"
           },
-          "socialLoginId": {
+          "registerToken": {
             "type": "string",
-            "description": "소셜 로그인 고유 ID",
-            "example": "google_112233"
+            "description": "소셜 로그인 실패 시 발급받은 임시 가입 토큰 (Raw socialId 전달 방지용)",
+            "example": "eyJhbGciOiJIUzI1NiIs..."
           }
         },
         "description": "판매자 회원가입 요청 DTO"
@@ -1599,19 +1659,19 @@
       "LoginRequest": {
         "required": [
           "provider",
-          "socialId"
+          "code"
         ],
         "type": "object",
         "properties": {
           "provider": {
             "type": "string",
-            "description": "소셜 제공자 (KAKAO, GOOGLE, LOCAL 등)",
-            "example": "KAKAO"
+            "description": "소셜 제공자 (NAVER, GOOGLE, KAKAO, LOCAL 등)",
+            "example": "NAVER"
           },
-          "socialId": {
+          "code": {
             "type": "string",
-            "description": "소셜 로그인 고유 ID",
-            "example": "kakao_98765"
+            "description": "소셜 로그인 인증 코드 (프론트엔드가 발급받아 전달, LOCAL 로그인 시에는 생략)",
+            "example": "AQAAAAEA..."
           },
           "password": {
             "type": "string",
@@ -1619,7 +1679,7 @@
             "example": "password123!"
           }
         },
-        "description": "로그인 요청 DTO"
+        "description": "로그인 요청 DTO (소셜 로그인은 code 필수, 로컬 로그인은 password 사용)"
       },
       "UserUpdateRequest": {
         "type": "object",
